@@ -8,9 +8,73 @@
 server <- function(input, output, session){
   file_out <- NULL
   final_out.df <- data.frame()
+  
+  api <- Sys.getenv("GX_API_KEY")
+  url <- Sys.getenv("GX_GALAXY_URL")
+  history_id <- Sys.getenv("GX_HISTORY_ID")
+  GalaxyConnector::gx_init(API_KEY = api, GALAXY_URL = url, HISTORY_ID = history_id) # Initialize our pkg env
+  
+  if(api == "" || url == "" || history_id == ""){
+    # We should exception handle here
+    # Print a message to the user, but for now let's just leave it blank
+    user_data <- "Unable to connect to Galaxy"
+  } else {
+    user_data <- GalaxyConnector::gx_list_history_datasets()['name']
+  }
+  
+  output$selectize <- renderUI({
+    selectizeInput(inputId = "select_dataset",
+                   label = "Select by dataset name",
+                   choices = user_data,
+                   multiple = FALSE,
+                   selected = NULL
+    )
+  })
+  
+  output$confirm_selectize <- renderUI({
+    shiny::actionButton(inputId = "btn_confirm_selection",
+                        label = "Confirm")
+  })
+  
+  observeEvent(input$btn_confirm_selection, {
+    print(input$select_dataset)
+    if(input$select_dataset != ''){ # Make sure that we have something selected first!
+
+      all_data <- dplyr::filter(GalaxyConnector::gx_list_history_datasets(), deleted == FALSE) # Filter out any deleted dataset
+      data_hid.df <- dplyr::filter(all_data, name == input$select_dataset) # Grab the data that's been selected
+
+      # Take the first piece of data
+      #   This could possibly be an issue since with collections there are multiple versions of the same data (by name).
+      #   If one of the pieces of data we need are changed then things can possibly go wrong
+      
+      # Let's check if the data is already downloaded.
+      datapath <- GalaxyConnector::gx_get(data_hid.df[1, 'hid'])
+      
+      if(!is.null(datapath)){
+        downloaded_data <- list.files(base::dirname(datapath)) # Take this and make it look really nice.
+        output$sample_selection <- renderUI({
+          prettyCheckboxGroup(inputId = "samples_check",
+                              label = "",
+                              inline = TRUE,
+                              status = "info",
+                              choices = downloaded_data,
+                              selected = )
+        })
+        # output$downloaded_samples <- renderUI({
+        #   prettyCheckboxGroup(inputId = "samples_check",
+        #                       label = "Downloaded samples",
+        #                       inline = TRUE,
+        #                       status = "info",
+        #                       choices = downloaded_data,
+        #                       selected = )
+        # })
+      }
+    }
+    
+  })
+  
 
   # Home tab ####
-
   ## Change the locus output depending on user input
   getLocus <- reactive({
     locus <- "list"
@@ -32,32 +96,33 @@ server <- function(input, output, session){
   output$entered_locus <- renderText({
     paste("Locus: ", getLocus())
   })
-
+  
+  # download_files <- reactive({
+  #   input$select_dataset
+  # })
   # Sample Selection Checkboxes
   output$sample_selection <- renderUI({
-    files <- list.files(path = here("data", "databases", input$org_tab_box, "assemblies"),
-                        pattern = "*.fasta") # Grab assemblies of selected org
-    chosen <- "NULL"
-    if(input$sample == "list"){ # Is the sample list selected?
-      chosen <- files # Update the chosen checkboxes
-    }
-
-    prettyCheckboxGroup(inputId = "samples_check",
-                        label = "Select a Sample...",
-                        inline = TRUE,
-                        status = "info",
-                        choices = files,
-                        selected  = chosen)
+    
+    # files <- list.files(path = here("data", "databases", input$org_tab_box, "assemblies"),
+    #                     pattern = "*.fasta") # Grab assemblies of selected org
+    # chosen <- "NULL"
+    # 
+    # prettyCheckboxGroup(inputId = "samples_check",
+    #                     label = "Select a Sample...",
+    #                     inline = TRUE,
+    #                     status = "info",
+    #                     choices = input$select_dataset,
+    #                     selected  = chosen)
   })
 
-  observeEvent(input$samples_check, {
-    samples <- input$samples_check
-    if(is.null(samples)){
-      writeLines("NULL")
-    } else {
-      print(input$samples_check)
-    }
-  })
+  # observeEvent(input$samples_check, {
+  #   samples <- input$samples_check
+  #   if(is.null(samples)){
+  #     writeLines("NULL")
+  #   } else {
+  #     print(input$samples_check)
+  #   }
+  # })
 
   # Output Tab ####
   output$download_data <- downloadHandler(
