@@ -32,4 +32,4 @@ if (!dir.exists(rappdirs::user_config_dir("wade", expand = FALSE))) {
 }
 
 # Shiny app call
-shiny::shinyApp(wade::dashboardUI, wade::pavianServer, enableBookmarking="server")
+shiny::shinyApp(wade::ui, wade::server, enableBookmarking="server")
