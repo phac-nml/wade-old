@@ -9,38 +9,7 @@ server <- function(input, output, session){
   file_out <- NULL
   final_out.df <- data.frame()
 
-  # Read from the
-  api <- Sys.getenv("GX_API_KEY")
-  url <- Sys.getenv("GX_GALAXY_URL")
-  history <- Sys.getenv("GX_HISTORY_ID")
-
-  # Initialize the package api, url, and history id's
-  GalaxyConnector::gx_init(API_KEY = api, GALAXY_URL = url, HISTORY_ID = history)
-  all_hist <- GalaxyConnector::gx_list_history_datasets()
-
-  user_sample <- reactive({ # The path of the user's input file
-    path <- "list"
-    name <- "list"
-
-    if(!is.na(input$user_num)){
-      if(input$user_num > 0 && input$user_num <= nrow(all_hist)){
-        tryCatch(path <- GalaxyConnector::gx_get(input$user_num),
-                 error = function(e){ NULL })
-        name <- all_hist[all_hist$hid == input$user_num, 'name']
-      }
-    }
-    data.frame(Filename = name, Path = path)
-  })
-
   # Home tab ####
-
-  # # shiny file choose. Connect to the shinyFilesButton for access to server side
-  # # file input
-  # roots = c(wd='../..')
-  # shinyFileChoose(input = input,
-  #                 id = "sample_upload",
-  #                 session = session,
-  #                 roots=roots)  # Go back to base directory in the container
 
   ## Change the locus output depending on user input
   getLocus <- reactive({
@@ -51,7 +20,6 @@ server <- function(input, output, session){
     locus
   })
 
-  # Could this section be condensed?
   output$selected_Org <- renderText({
     paste("Organism: ", input$org_tab_box)
   })
@@ -63,10 +31,6 @@ server <- function(input, output, session){
 
   output$entered_locus <- renderText({
     paste("Locus: ", getLocus())
-  })
-
-  output$entered_sample <- renderText({
-    paste("Sample: ", user_sample()$Filename, collapse = "")
   })
 
   # Sample Selection Checkboxes
