@@ -13,12 +13,6 @@ if(!require(wade)){
   library(pavian)
 }
 
-# if (!require(Rsamtools)) {
-#   source("https://bioconductor.org/biocLite.R")
-#   biocLite("Rsamtools")
-#   library(Rsamtools)
-# }
-
 if(!require(GalaxyConnector)){
   options(repos = c(CRAN = "http://cran.rstudio.com")) 
   if(!require(remotes)){ install.packages("remotes") }
