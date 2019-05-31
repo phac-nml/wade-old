@@ -139,9 +139,7 @@ ui <- dashboardPage(skin = "blue",
                                   box(id = "selected_output",
                                       textOutput("selected_Org"),
                                       textOutput("selected_test"),
-                                      textOutput("entered_locus"),
-                                      textOutput("entered_sample"),
-                                      textOutput("galaxy_access")
+                                      textOutput("entered_locus")
                                   ),
                                   box(id = "samples",
                                       collapsible = TRUE,
