@@ -1,5 +1,5 @@
 #' Function building dashboard UI, used in Shiny app
-#'
+#' 
 #' @export
 ui <- dashboardPage(skin = "blue",
                     dashboardHeader(title = "WADE"),
@@ -114,8 +114,11 @@ ui <- dashboardPage(skin = "blue",
                                   ),
                                   # Loci and Sample Box ####
                                   tabBox(id = "sample_tab_box",
-                                         tabPanel("Select Data",
-                                                  dataInputModuleUI("data_input")),
+                                         tabPanel("Data from Galaxy",
+                                                  uiOutput("selectize"),
+                                                  uiOutput("confirm_selectize"),
+                                                  uiOutput("downloaded_samples")
+                                         ),
                                          tabPanel("Loci",
                                                   # Select Locus ####
                                                   prettyRadioButtons(inputId = "locus",
