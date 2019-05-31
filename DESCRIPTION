@@ -1,0 +1,20 @@
+Package: wade
+Title: Executes molecular typing on contig assemblies
+Version: 0.1.0
+Authors@R: person("Justin", "Band", email = "justin.band@canada.ca", role = c("aut", "cre"))
+Description: Creates an output_profile.csv of molecular typing results.
+Depends: R (>= 3.5.3)
+License: NML/PHAC
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.1.1.9000
+Imports:
+    devtools,
+    shiny,
+    shinydashboard,
+    shinyWidgets,
+    tidyverse,
+    here,
+    GalaxyConnector
+Suggests: 
+	testthat
