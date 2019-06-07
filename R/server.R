@@ -9,6 +9,10 @@ server <- function(input, output, session){
   file_out <- NULL
   final_out.df <- data.frame()
   
+  names <- c("subdir_id", "filename")
+  downloaded_fullpath <- ""
+  downloaded_samples.df <- data.frame(subdir_id, filename)
+  
   api <- Sys.getenv("GX_API_KEY")
   url <- Sys.getenv("GX_GALAXY_URL")
   history_id <- Sys.getenv("GX_HISTORY_ID")
@@ -50,6 +54,12 @@ server <- function(input, output, session){
       datapath <- GalaxyConnector::gx_get(data_hid.df[1, 'hid'])
       
       if(!is.null(datapath)){
+        if(downloaded_fullpath == ""){ # Grab the path earlier so we can use tidy data
+          downloaded_fullpath <- base::basename(base::dirname(datapath))
+        }
+        
+        downloaded_samples.df <- addDirFiles(base::dirname(datapath), downloaded_samples.df) # DATAFRAME OF ALL THE CONCATENATED DATA
+        
         downloaded_data <- list.files(base::dirname(datapath)) # Take this and make it look really nice.
         output$sample_selection <- renderUI({
           prettyCheckboxGroup(inputId = "samples_check",
@@ -59,10 +69,22 @@ server <- function(input, output, session){
                               choices = downloaded_data,
                               selected = downloaded_data)
         })
+      } else {
+        # RAISE ERROR ####
       }
     }
     
   })
+  
+  addDirFiles <- function(dir, df){
+    subdir_id <- basename(dir) # Will be a number representing the data/collection number from Galaxy
+    all_files <- list.files(dir) # All the files in the subdir
+    
+    dir_files.df <- data.frame(subdir_id, all_files)
+    names(dir_files.df) <- names
+    df <- rbind(df, dir_files.df)
+    df # return df!
+  }
   
 
   # Home tab ####
