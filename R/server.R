@@ -37,7 +37,6 @@ server <- function(input, output, session){
   })
   
   observeEvent(input$btn_confirm_selection, {
-    print(input$select_dataset)
     if(input$select_dataset != ''){ # Make sure that we have something selected first!
 
       all_data <- dplyr::filter(GalaxyConnector::gx_list_history_datasets(), deleted == FALSE) # Filter out any deleted dataset
@@ -101,7 +100,6 @@ server <- function(input, output, session){
   output$download_data <- downloadHandler(
     filename = function() { paste("test-", Sys.Date(), ".csv", sep = "") },
     content = function(file) {
-      print(file_out)
       write.table(x = read_table(file_out),
                   file)
     }
