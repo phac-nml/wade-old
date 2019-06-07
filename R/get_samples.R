@@ -6,6 +6,7 @@
 #'
 #' @param sample_num the sample the user input
 #' @return A data frame containing a read .csv file or containing a single sample
+#' @export
 
 # TODO
 #   - Change data location based on the function accessing this function
