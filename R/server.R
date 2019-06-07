@@ -58,16 +58,8 @@ server <- function(input, output, session){
                               inline = TRUE,
                               status = "info",
                               choices = downloaded_data,
-                              selected = )
+                              selected = downloaded_data)
         })
-        # output$downloaded_samples <- renderUI({
-        #   prettyCheckboxGroup(inputId = "samples_check",
-        #                       label = "Downloaded samples",
-        #                       inline = TRUE,
-        #                       status = "info",
-        #                       choices = downloaded_data,
-        #                       selected = )
-        # })
       }
     }
     
@@ -83,6 +75,14 @@ server <- function(input, output, session){
     }
     locus
   })
+  
+  getSamples <- reactive({
+    samples <- "" # start as empty
+    if(!is.null(input$samples_check) && !purrr::is_empty(input$samples_check)){
+      samples <- input$samples_check
+    }
+    samples
+  })
 
   output$selected_Org <- renderText({
     paste("Organism: ", input$org_tab_box)
@@ -96,33 +96,6 @@ server <- function(input, output, session){
   output$entered_locus <- renderText({
     paste("Locus: ", getLocus())
   })
-  
-  # download_files <- reactive({
-  #   input$select_dataset
-  # })
-  # Sample Selection Checkboxes
-  output$sample_selection <- renderUI({
-    
-    # files <- list.files(path = here("data", "databases", input$org_tab_box, "assemblies"),
-    #                     pattern = "*.fasta") # Grab assemblies of selected org
-    # chosen <- "NULL"
-    # 
-    # prettyCheckboxGroup(inputId = "samples_check",
-    #                     label = "Select a Sample...",
-    #                     inline = TRUE,
-    #                     status = "info",
-    #                     choices = input$select_dataset,
-    #                     selected  = chosen)
-  })
-
-  # observeEvent(input$samples_check, {
-  #   samples <- input$samples_check
-  #   if(is.null(samples)){
-  #     writeLines("NULL")
-  #   } else {
-  #     print(input$samples_check)
-  #   }
-  # })
 
   # Output Tab ####
   output$download_data <- downloadHandler(
@@ -141,7 +114,7 @@ server <- function(input, output, session){
                    selected = "output")
 
     locus <- getLocus()
-    sample <- "list" #user_sample()
+    sample <- getSamples() # We need to make sure that sample isn't empty.
     org <- input$org_tab_box
     test <- input[[paste(input$org_tab_box, "_test", sep = "")]] # Does this cause an issue?
 
