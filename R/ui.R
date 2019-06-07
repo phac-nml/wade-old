@@ -1,3 +1,5 @@
+library(shinydashboard)
+
 #' Function building dashboard UI, used in Shiny app
 #' 
 #' @export
@@ -12,8 +14,8 @@ ui <- dashboardPage(skin = "blue",
                                .shiny-notification {
                                width: 80%;
                                position:fixed;
-                               top: calc(90%);;
-                               left: calc(15%);;
+                               top: calc(90%);
+                               left: calc(15%);
                                font-size: 250%;
                                text-align: center;
                                }
@@ -116,8 +118,7 @@ ui <- dashboardPage(skin = "blue",
                                   tabBox(id = "sample_tab_box",
                                          tabPanel("Data from Galaxy",
                                                   uiOutput("selectize"),
-                                                  uiOutput("confirm_selectize"),
-                                                  uiOutput("downloaded_samples")
+                                                  uiOutput("confirm_selectize")
                                          ),
                                          tabPanel("Loci",
                                                   # Select Locus ####
