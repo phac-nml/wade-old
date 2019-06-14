@@ -9,21 +9,26 @@ server <- function(input, output, session){
   file_out <- NULL
   final_out.df <- data.frame()
   
-  names <- c("subdir_id", "filename")
-  downloaded_fullpath <- ""
-  downloaded_samples.df <- data.frame(subdir_id, filename)
+  names <- c("parent_dir", "subdir_id", "filename")
+  fullpath <- ""
+  downloaded_samples.df <- data.frame(matrix(ncol = 3, nrow = 0)) # Initialize to an empty df
+  names(downloaded_samples.df) <- names # Give the df some col names
   
+  # ---- Grab the Galaxy info from the Environment ---- #
   api <- Sys.getenv("GX_API_KEY")
   url <- Sys.getenv("GX_GALAXY_URL")
   history_id <- Sys.getenv("GX_HISTORY_ID")
+  
   GalaxyConnector::gx_init(API_KEY = api, GALAXY_URL = url, HISTORY_ID = history_id) # Initialize our pkg env
   
   if(api == "" || url == "" || history_id == ""){
     # We should exception handle here
     # Print a message to the user, but for now let's just leave it blank
     user_data <- "Unable to connect to Galaxy"
+    all_data <- "Unable to connect to Galaxy"
   } else {
     user_data <- GalaxyConnector::gx_list_history_datasets()['name']
+    all_data <- dplyr::filter(GalaxyConnector::gx_list_history_datasets(), deleted == FALSE) # Filter out any deleted dataset
   }
   
   output$selectize <- renderUI({
@@ -42,8 +47,7 @@ server <- function(input, output, session){
   
   observeEvent(input$btn_confirm_selection, {
     if(input$select_dataset != ''){ # Make sure that we have something selected first!
-
-      all_data <- dplyr::filter(GalaxyConnector::gx_list_history_datasets(), deleted == FALSE) # Filter out any deleted dataset
+      
       data_hid.df <- dplyr::filter(all_data, name == input$select_dataset) # Grab the data that's been selected
 
       # Take the first piece of data
@@ -54,20 +58,25 @@ server <- function(input, output, session){
       datapath <- GalaxyConnector::gx_get(data_hid.df[1, 'hid'])
       
       if(!is.null(datapath)){
-        if(downloaded_fullpath == ""){ # Grab the path earlier so we can use tidy data
-          downloaded_fullpath <- base::basename(base::dirname(datapath))
-        }
         
-        downloaded_samples.df <- addDirFiles(base::dirname(datapath), downloaded_samples.df) # DATAFRAME OF ALL THE CONCATENATED DATA
+        fullpath <- base::dirname(datapath) # Get everything up until the name of the data
+        parent_dir <- base::dirname(fullpath) # Append dir_num so we can use list.files!
+        dir_num <- base::basename(fullpath) # Get only the directory the data exists to use for tidy data
         
-        downloaded_data <- list.files(base::dirname(datapath)) # Take this and make it look really nice.
+        combine.df <- data.frame("parent_dir" = parent_dir, "subdir_id" = dir_num, "filename" = list.files(fullpath), stringsAsFactors = FALSE)
+        downloaded_samples.df <<- rbind(downloaded_samples.df, combine.df) # We need to change it globally. Could also use a reactive?
+        print(downloaded_samples.df)
+        
+        # Use our downloaded data frame
+        samples <- downloaded_samples.df %>% pull(filename)
+        
         output$sample_selection <- renderUI({
           prettyCheckboxGroup(inputId = "samples_check",
                               label = "",
                               inline = TRUE,
                               status = "info",
-                              choices = downloaded_data,
-                              selected = downloaded_data)
+                              choices = samples,
+                              selected = samples)
         })
       } else {
         # RAISE ERROR ####
@@ -75,17 +84,6 @@ server <- function(input, output, session){
     }
     
   })
-  
-  addDirFiles <- function(dir, df){
-    subdir_id <- basename(dir) # Will be a number representing the data/collection number from Galaxy
-    all_files <- list.files(dir) # All the files in the subdir
-    
-    dir_files.df <- data.frame(subdir_id, all_files)
-    names(dir_files.df) <- names
-    df <- rbind(df, dir_files.df)
-    df # return df!
-  }
-  
 
   # Home tab ####
   ## Change the locus output depending on user input
@@ -97,10 +95,22 @@ server <- function(input, output, session){
     locus
   })
   
-  getSamples <- reactive({
+  downloadedDim <- reactive({
+    dimensions <- dim(downloaded_samples.df)
+    dimensions
+  })
+  
+  getSamples <- reactive({ # getSamples() will return a data frame
     samples <- "" # start as empty
+    
+    print(input$samples_check)
     if(!is.null(input$samples_check) && !purrr::is_empty(input$samples_check)){
-      samples <- input$samples_check
+      
+      print(downloadedDim())
+      if(downloadedDim()[1] > 0 && downloadedDim()[2] > 0){ # Is there actually data that we can use?
+        samples <- dplyr::filter(downloaded_samples.df, filename == input$samples_check)
+        print(samples)
+      }
     }
     samples
   })
@@ -134,11 +144,12 @@ server <- function(input, output, session){
                    selected = "output")
 
     locus <- getLocus()
-    sample <- getSamples() # We need to make sure that sample isn't empty.
+    samples <- getSamples() # We need to make sure that sample isn't empty.
+    print(samples)
     org <- input$org_tab_box
     test <- input[[paste(input$org_tab_box, "_test", sep = "")]] # Does this cause an issue?
 
-    output.df <- execute_analysis(org, sample, locus, test)
+    output.df <- execute_analysis(org, samples, locus, test) # EXECUTE ANALYSIS
     output$profile_table <- renderDataTable(output.df,
                                             options = list(scrollX = TRUE,
                                                            pageLength = 10)
@@ -211,25 +222,25 @@ server <- function(input, output, session){
   # Calls the correct analysis
   #
   # org: string
-  # sample: dataframe of Filename and the path
+  # samples: dataframe of Filename and the path
   # locus: string
   # test: string
-  execute_analysis <- function(org, sample, locus, test){
+  execute_analysis <- function(org, samples, locus, test){
     withProgress(message = "Work in progress...",
                  value = 0, {
 
                    switch(test,
-                          AMR_DB = { database_pipeline(org, sample, FALSE) },
+                          AMR_DB = { database_pipeline(org, samples, FALSE) },
                           AMR_LW = { labware_gono_amr() },
                           EMM = { emm(org, sample, locus) },
-                          MASTER = { master_blastr(org, test, sample, locus) },
-                          MLST = { general_mlst_pipeline(org, sample, locus, test) },
-                          NGSTAR = { general_mlst_pipeline(org, sample, locus, test) },
-                          NGMAST = { general_mlst_pipeline(org, sample, locus, test) },
-                          rRNA23S = { rna_23s(org, sample) },
-                          SERO = { PneumoCaT_pipeline(sample) },
-                          VFDB = { database_pipeline(org, sample, TRUE) },
-                          { master_blastr(org, test, sample, locus) }
+                          MASTER = { master_blastr(org, test, samples, locus) },
+                          MLST = { general_mlst_pipeline(org, samples, locus, test) },
+                          NGSTAR = { general_mlst_pipeline(org, samples, locus, test) },
+                          NGMAST = { general_mlst_pipeline(org, samples, locus, test) },
+                          rRNA23S = { rna_23s(org, samples) },
+                          SERO = { PneumoCaT_pipeline(samples) },
+                          VFDB = { database_pipeline(org, samples, TRUE) },
+                          { master_blastr(org, test, samples, locus) }
                    )
                  })
   }
