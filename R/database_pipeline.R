@@ -36,8 +36,6 @@ database_pipeline <- function(org_id, samples.df, is_vfdb){
   #       - What should be output then?
   #
   # - Will the sbatch command be used for blastn?
-  #
-  # - When there is only one sample IncProgress is useless, should go as it executes the blast commands
 
   if(is_vfdb){ # Change DB based on is_vfdb
     databases <- "VFDB"
@@ -45,33 +43,18 @@ database_pipeline <- function(org_id, samples.df, is_vfdb){
     databases <- c("arg-annot", "resfinder2", "CARD")
   }
 
-  # Initialize Return DF ####
-  results.df <- data.frame()
-
-  # Directories ####
-  # contigs_dir <- here("data", "databases", org_id, "assemblies")
-  # sample_numbers <- get_samples(org_id, sample_num) %>% select("SampleNo") # List of the samples
-  
-  inc_amount <- 1/(length(databases)*nrow(sample.df)) # Amount to increment, based on the number of databases and samples
-
-  # concat history_id/dataset_id/filename into a file path
-  all_samples <- data.frame("path" = file.path(samples.df[,"parent_dir"], samples.df[,"subdir_id"], samples[,"filename"])) # Put it into a data frame
+  # Initializing ####
+  inc_amount <- 1/(length(databases)*nrow(samples.df)) # increment amount, for progress bar
   sample_files <- file.path(samples.df[,"parent_dir"], samples.df[,"subdir_id"], samples.df[,"filename"]) # List of all files and their path
   
   db_samples.df <- databases %>% map_dfr(~ data.frame("db" = .x, 
                                                       "sample" = sample_files, 
                                                       stringsAsFactors = FALSE))
   
-  output.df <- walk2(db_samples.df[,"db"], db_samples.df[,"sample"], ~ execute_blastout(.x, .y))
-  
-  output.df <- unlist(sample_files) %>% map_dfr(function(x){
-    curr_sample = x
-    out <- databases %>% map_dfr(~ execute_blastout(curr_db = .x,
-                                                    sample = curr_sample))
-  })
+  output.df <- map2_df(db_samples.df[,"db"], db_samples.df[,"sample"], ~ execute_blastout(.x, .y, inc_amount)) %>%
+    select("SampleNo", "DataBase", "GeneID", "MatchID") # Just rearranging the columns here
 
-  output.df <- select(output.df, "SampleNo", "DataBase", "GeneID", "MatchID")
-  print(output.df)
+  #output.df <- select(output.df, "SampleNo", "DataBase", "GeneID", "MatchID")
 
   writeLines(paste("Writing output to", here("data", "DB_PIPELINE_OUT.tsv")))
   write.csv(x = output.df,
@@ -85,13 +68,13 @@ database_pipeline <- function(org_id, samples.df, is_vfdb){
 #-------------
 # using "-outfmt 6" in the blast command provides us with an output table to read from. This there's no need to
 #   parse through a file, line by painful line.
-execute_blastout <- function(curr_db, sample){
+execute_blastout <- function(curr_db, sample, inc_amount){
   sample_num <- basename(sample) # Vector of sample names .fasta
 
-  # incProgress(amount = inc_amount,
-  #             message = paste(sample_num, " against ", curr_db, sep = ""))
+  incProgress(amount = inc_amount,
+              message = paste("Blasting ", sample_num, " against ", curr_db, sep = ""))
 
-  writeLines(paste("Executing blastn for:", sample_num))
+  writeLines(paste("Executing blastn for:", sample_num, "on db", curr_db))
   headers <- c("SampleNo", "DataBase", "GeneID", "MatchID")
 
   if(curr_db == "VFDB"){
@@ -100,18 +83,19 @@ execute_blastout <- function(curr_db, sample){
     blast_evalue <- "10e-100"
   }
 
-  # db_dir <- here("data", "databases", curr_db, paste(curr_db, ".fasta", sep = "")) # data/databases/curr_db/curr_db.fasta
+  # DATABASE ACCESS ####
+  db_dir <- here("data", "databases", curr_db, paste(curr_db, ".fasta", sep = "")) # data/databases/curr_db/curr_db.fasta
   output_location <- here("data", "databases", curr_db, paste(curr_db, "_blast_out.tsv", sep = "")) # data/curr_db/curr_db.fasta
-  # 
-  # #sbatch_command <- "sbatch -p NMLResearch -c 1 --mem=1G -J %u-database_pipeline-%J --wrap=" # Use a better job name
-  # blast_command <- paste("blastn -db ", db_dir, " -query ",
-  #                        sample, " -outfmt 6 -out ", output_location, " -evalue ", blast_evalue, sep = "")
-  # 
-  # #sys_command <- paste(sbatch_command, "'", blast_command, "'", sep = "")
-  # sys_command <- blast_command
-  # try(system(sys_command)) # Blast command call
+  
+  blast_command <- paste("blastn -db ", db_dir, " -query ",
+                         sample, " -outfmt 6 -out ", output_location, " -evalue ", blast_evalue, sep = "")
+  sys_command <- blast_command
 
-  # grab the file to make sure it's not empty
+  # If batch command is needed ####  
+  #sbatch_command <- "sbatch -p NMLResearch -c 1 --mem=1G -J %u-database_pipeline-%J --wrap=" # Use a better job name
+  #sys_command <- paste(sbatch_command, "'", blast_command, "'", sep = "")
+  try(system(sys_command)) # Blast command call
+
   info <- file.info(output_location)
 
   if(!is.na(info) && info$size > 0){
