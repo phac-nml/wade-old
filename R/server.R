@@ -11,7 +11,7 @@ server <- function(input, output, session){
   
   names <- c("parent_dir", "subdir_id", "filename")
   fullpath <- ""
-  downloaded_samples.df <- data.frame(matrix(ncol = 3, nrow = 0)) # Initialize to an empty df
+  downloaded_samples.df <- data.frame(matrix(ncol = 3, nrow = 0), stringsAsFactors = FALSE) # Initialize to an empty df
   names(downloaded_samples.df) <- names # Give the df some col names
   
   # ---- Grab the Galaxy info from the Environment ---- #
@@ -109,7 +109,6 @@ server <- function(input, output, session){
       print(downloadedDim())
       if(downloadedDim()[1] > 0 && downloadedDim()[2] > 0){ # Is there actually data that we can use?
         samples <- dplyr::filter(downloaded_samples.df, filename == input$samples_check)
-        print(samples)
       }
     }
     samples
