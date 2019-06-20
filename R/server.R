@@ -105,10 +105,8 @@ server <- function(input, output, session){
     
     print(input$samples_check)
     if(!is.null(input$samples_check) && !purrr::is_empty(input$samples_check)){
-      
-      print(downloadedDim())
       if(downloadedDim()[1] > 0 && downloadedDim()[2] > 0){ # Is there actually data that we can use?
-        samples <- dplyr::filter(downloaded_samples.df, filename == input$samples_check)
+        samples <- dplyr::filter(downloaded_samples.df, filename %in% input$samples_check)
       }
     }
     samples
