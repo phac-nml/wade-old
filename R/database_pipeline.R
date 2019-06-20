@@ -2,7 +2,7 @@
 #' Generic Profiler : SampleNo_contigs.fasta vs. arg-annot/resfinder2/CARD or VFDB
 #'
 #' @param org_id Organism to query: GAS or GONO
-#' @param sample_num Sample number (or list of sample numbers) associated with contig.fasta file
+#' @param samples.df Data frame of user selected samples and the sample paths
 #' @param is_vfdb Boolean, determine which database is being used. Specified from main call
 #'
 #' @details
@@ -28,7 +28,7 @@
 #' @return A table frame containing the results of the query
 #' @export
 
-database_pipeline <- function(org_id, sample_num, is_vfdb){
+database_pipeline <- function(org_id, samples.df, is_vfdb){
   # TODO ####
   # - Error Checking
   #     - Does the sample entered exist?
@@ -49,20 +49,25 @@ database_pipeline <- function(org_id, sample_num, is_vfdb){
   results.df <- data.frame()
 
   # Directories ####
-  contigs_dir <- here("data", "databases", org_id, "assemblies")
+  # contigs_dir <- here("data", "databases", org_id, "assemblies")
+  # sample_numbers <- get_samples(org_id, sample_num) %>% select("SampleNo") # List of the samples
+  
+  inc_amount <- 1/(length(databases)*nrow(sample.df)) # Amount to increment, based on the number of databases and samples
 
-  sample_numbers <- get_samples(org_id, sample_num) %>% select("SampleNo") # List of the samples
-  inc_amount <- 1/(length(databases)*nrow(sample_numbers)) # Amount to increment, based on the number of databases and samples
-
-  sample_files <- sample_numbers %>%
-    map_df(~ paste(contigs_dir, "/", .x, ".fasta", sep = "")) %>%
-    filter(file.exists(SampleNo))
-  names(sample_files) <- "path"
-
+  # concat history_id/dataset_id/filename into a file path
+  all_samples <- data.frame("path" = file.path(samples.df[,"parent_dir"], samples.df[,"subdir_id"], samples[,"filename"])) # Put it into a data frame
+  sample_files <- file.path(samples.df[,"parent_dir"], samples.df[,"subdir_id"], samples.df[,"filename"]) # List of all files and their path
+  
+  db_samples.df <- databases %>% map_dfr(~ data.frame("db" = .x, 
+                                                      "sample" = sample_files, 
+                                                      stringsAsFactors = FALSE))
+  
+  output.df <- walk2(db_samples.df[,"db"], db_samples.df[,"sample"], ~ execute_blastout(.x, .y))
+  
   output.df <- unlist(sample_files) %>% map_dfr(function(x){
     curr_sample = x
     out <- databases %>% map_dfr(~ execute_blastout(curr_db = .x,
-                                          sample = curr_sample))
+                                                    sample = curr_sample))
   })
 
   output.df <- select(output.df, "SampleNo", "DataBase", "GeneID", "MatchID")
@@ -80,7 +85,7 @@ database_pipeline <- function(org_id, sample_num, is_vfdb){
 #-------------
 # using "-outfmt 6" in the blast command provides us with an output table to read from. This there's no need to
 #   parse through a file, line by painful line.
-execute_blastout <- function(curr_db, sample){#, inc_amount){
+execute_blastout <- function(curr_db, sample){
   sample_num <- basename(sample) # Vector of sample names .fasta
 
   # incProgress(amount = inc_amount,
@@ -89,27 +94,27 @@ execute_blastout <- function(curr_db, sample){#, inc_amount){
   writeLines(paste("Executing blastn for:", sample_num))
   headers <- c("SampleNo", "DataBase", "GeneID", "MatchID")
 
-  if(curr_db %in% "VFDB"){
+  if(curr_db == "VFDB"){
     blast_evalue <- "10e-50"
   } else {
     blast_evalue <- "10e-100"
   }
 
-  db_dir <- here("data", "databases", curr_db, paste(curr_db, ".fasta", sep = "")) # data/databases/curr_db/curr_db.fasta
+  # db_dir <- here("data", "databases", curr_db, paste(curr_db, ".fasta", sep = "")) # data/databases/curr_db/curr_db.fasta
   output_location <- here("data", "databases", curr_db, paste(curr_db, "_blast_out.tsv", sep = "")) # data/curr_db/curr_db.fasta
-
-  #sbatch_command <- "sbatch -p NMLResearch -c 1 --mem=1G -J %u-database_pipeline-%J --wrap=" # Use a better job name
-  blast_command <- paste("blastn -db ", db_dir, " -query ",
-                         sample, " -outfmt 6 -out ", output_location, " -evalue ", blast_evalue, sep = "")
-
-  #sys_command <- paste(sbatch_command, "'", blast_command, "'", sep = "")
-  sys_command <- blast_command
-  try(system(sys_command)) # Blast command call
+  # 
+  # #sbatch_command <- "sbatch -p NMLResearch -c 1 --mem=1G -J %u-database_pipeline-%J --wrap=" # Use a better job name
+  # blast_command <- paste("blastn -db ", db_dir, " -query ",
+  #                        sample, " -outfmt 6 -out ", output_location, " -evalue ", blast_evalue, sep = "")
+  # 
+  # #sys_command <- paste(sbatch_command, "'", blast_command, "'", sep = "")
+  # sys_command <- blast_command
+  # try(system(sys_command)) # Blast command call
 
   # grab the file to make sure it's not empty
   info <- file.info(output_location)
 
-  if(info$size > 0){
+  if(!is.na(info) && info$size > 0){
     # Read the table to get both the GeneID and MatchID
     table <- read.table(file = output_location, stringsAsFactors = FALSE)
     curr_blast_table.df <- select(table, "V1", "V2")
