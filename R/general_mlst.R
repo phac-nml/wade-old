@@ -4,7 +4,7 @@
 #' Create a profile for MLST, NGMAST, or NGSTAR using blastn
 #'
 #' @param org_id Organism to query: GAS, PNEUMO or GONO
-#' @param sample_num Sample number associated with contig.fasta file
+#' @param samples.df Data frame of user selected samples and the sample paths
 #' @param locus The locus to query, or enter "list" to use a list of alleles
 #' @param seq_type The sequence type to use. Can be MLST, NGMAST, or NSTAR
 #'
@@ -13,27 +13,25 @@
 #' @return A profile containing the sample number, and the loci tested on
 #' @export
 
-general_mlst_pipeline <- function(org_id, sample_num, locus, seq_type){
+general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
   # TODO ####
-  # - Make cases for each NGSTAR and NGMAST (added seq_type to help with this)
-  # - Make sure the seq_type is one of the types we want!
   # - Add file paths for all input data
   # - If mutation info is not used for MLST or NGMAST then we don't need a case to create it or not
   #
   # - if(allele_num != "SampleErr") will keep looping! Why not just stop???
-  # - Check if seq_type is one of MLST, NGMAST, NGSTAR
 
+  # ------------- Directories ----------------
   db_dir <- paste("data/databases")
 
-  contigs_dir <- here("data", "databases", org_id, "assemblies")
-  lookup_dir <- here(db_dir, org_id, seq_type, "allele_lkup_dna")
-  temp_dir <- here(db_dir, org_id, seq_type, "temp")
-  loci.list <- paste(temp_dir, "/", "loci.csv", sep = "")
+  contigs_dir <- here("data", "databases", org_id, "assemblies") # Where are the assemblies
+  lookup_dir <- here(db_dir, org_id, seq_type, "allele_lkup_dna") # Lookups
+  temp_dir <- here(db_dir, org_id, seq_type, "temp") # Temporary
   profiles_dir <- paste(temp_dir, "/", "profiles.csv", sep = "")
-
+  loci.list <- paste(temp_dir, "/", "loci.csv", sep = "") # Loci list
+  
   # ------------- Initialize Loci ----------------
   writeLines("Initialize Loci....")
-  loci.df <- read.csv(file = loci.list,
+  loci.df <- read.csv(file = loci.list, # read loci.csv
                       header = TRUE,
                       sep = ",",
                       stringsAsFactors = FALSE)
@@ -43,7 +41,6 @@ general_mlst_pipeline <- function(org_id, sample_num, locus, seq_type){
 
   # ------------- Initialize Sample ---------------
   writeLines("Initialize Sample....")
-  samples.df <- get_samples(org_id, sample_num)
   num_samples <- (dim(samples.df))[1]
 
   # ------------- Initialize Profiles ------------------
@@ -63,8 +60,8 @@ general_mlst_pipeline <- function(org_id, sample_num, locus, seq_type){
     allele <- ""
     allele_num <- ""
 
-    curr_sample_num <- as.character(samples.df[i, "SampleNo"])
-    curr_file <- paste(contigs_dir, "/", curr_sample_num, ".fasta", sep = "")
+    curr_sample_num <- sub("([^.]+)\\.[[:alnum:]]+$", "\\1", samples.df[i, "filename"])
+    curr_file <- file.path(samples.df[i, "parent_dir"], samples.df[i, "subdir_id"], samples.df[i, "filename"])
 
     dest_file <- here("data", "queryfile.fasta") # Still need a finalized location
 
@@ -102,14 +99,14 @@ general_mlst_pipeline <- function(org_id, sample_num, locus, seq_type){
         try(system(blast_command))
 
         blast_info <- file.info(blast_out_file) # get the results from the blast command
-
+        
         if(blast_info$size == 0){
           allele <- "No gene present"
           allele_num <- "0"
 
           # ---> difference in NGSTAR here <---
           mutations <- "?"
-          blast_out.df <- data.frame(sample_num, curr_locus)
+          blast_out.df <- data.frame(curr_sample_num, curr_locus)
         } else {
           blast_out.df <- read.csv(file = blast_out_file,
                                    header = FALSE,
@@ -254,7 +251,6 @@ general_mlst_pipeline <- function(org_id, sample_num, locus, seq_type){
 
     if(seq_type == "MLST"){
       # --- MLST out
-      print(paste(out_location, "/", org_id, "_MLST.csv", sep = ""))
       write.csv(sample_out.df,
                 paste(out_location, "/", org_id, "_MLST.csv", sep = ""),
                 quote = FALSE,  row.names = FALSE)
