@@ -10,31 +10,17 @@
 #' dfrF, dfrG, DHFR, ermA, ermB, ermT, folA, folP, gyrA, mefAE, msrD, parC, rpsJ, tetM, tetO
 #' note that ermA == ermTR, ermC == ermT, mefA/E includes mefA and mefE; DHFR is the same as folA
 #'
-#' ARG-ANNOT is a downloaded as a single multifasta. When a new download is made, on the Windows
-#' command prompt, naviate to :
-#' "L:\ GC_PAHO\ Whole_Genome_Sequencing\ WGS_Typing\ Resistance_Genes\ arg_annot"
-#' Then make BLAST index by running from command prompt: "makeblastdb -in arg-annot.fasta -dbtype nucl"
+#' ARG-ANNOT is a downloaded as a single multifasta
 #'
-#' RESFINDER is separated into antimicrobial classes.  Use Windows command prompt to navigate to
-#' "L:\ GC_PAHO\ Whole_Genome_Sequencing\ WGS_Typing\ Resistance_Genes\ resfinder2" folder, then run:
-#' "copy /b *.fsa resfinder2.fasta" to concatenate all into one multifasta.
-#' Then make BLAST index by running from command prompt: "makeblastdb -in resfinder2.fasta -dbtype nucl"
+#' RESFINDER is separated into antimicrobial classes
 #'
-#' VFDB is a downloaded from the web site as a single multifasta. When a new download is made, on the Windows
-#' command prompt, naviate to :
-#' "L:\ GC_PAHO\ Whole_Genome_Sequencing\ WGS_Typing\ VFDB \ "
-#' Then make BLAST index by running from command prompt: "makeblastdb -in VFDB.fasta -dbtype nucl"
+#' VFDB is a downloaded from the web site as a single multifasta
 #'
 #' @return A table frame containing the results of the query
 #' @export
 
 database_pipeline <- function(org_id, samples.df, is_vfdb){
   # TODO ####
-  # - Error Checking
-  #     - Does the sample entered exist?
-  #       - We don't want it to crash because a bad sample
-  #       - What should be output then?
-  #
   # - Will the sbatch command be used for blastn?
 
   if(is_vfdb){ # Change DB based on is_vfdb
@@ -54,8 +40,6 @@ database_pipeline <- function(org_id, samples.df, is_vfdb){
   output.df <- map2_df(db_samples.df[,"db"], db_samples.df[,"sample"], ~ execute_blastout(.x, .y, inc_amount)) %>%
     select("SampleNo", "DataBase", "GeneID", "MatchID") # Just rearranging the columns here
 
-  #output.df <- select(output.df, "SampleNo", "DataBase", "GeneID", "MatchID")
-
   writeLines(paste("Writing output to", here("data", "DB_PIPELINE_OUT.tsv")))
   write.csv(x = output.df,
             file = here("data", "DB_PIPELINE_OUT.tsv"),
@@ -65,9 +49,6 @@ database_pipeline <- function(org_id, samples.df, is_vfdb){
   output.df
 }
 
-#-------------
-# using "-outfmt 6" in the blast command provides us with an output table to read from. This there's no need to
-#   parse through a file, line by painful line.
 execute_blastout <- function(curr_db, sample, inc_amount){
   sample_num <- basename(sample) # Vector of sample names .fasta
 
@@ -87,13 +68,16 @@ execute_blastout <- function(curr_db, sample, inc_amount){
   db_dir <- here("data", "databases", curr_db, paste(curr_db, ".fasta", sep = "")) # data/databases/curr_db/curr_db.fasta
   output_location <- here("data", "databases", curr_db, paste(curr_db, "_blast_out.tsv", sep = "")) # data/curr_db/curr_db.fasta
   
-  blast_command <- paste("blastn -db ", db_dir, " -query ",
-                         sample, " -outfmt 6 -out ", output_location, " -evalue ", blast_evalue, sep = "")
-  sys_command <- blast_command
+  #-------------
+  # using "-outfmt 6" in the blast command provides us with an output table to read from. This there's no need to
+  #   parse through a file, line by painful line.
+  # blast_command <- paste("blastn -db ", db_dir, " -query ",
+  #                        sample, " -outfmt 6 -out ", output_location, " -evalue ", blast_evalue, sep = "")
+  # sys_command <- blast_command
 
   # If batch command is needed ####  
-  #sbatch_command <- "sbatch -p NMLResearch -c 1 --mem=1G -J %u-database_pipeline-%J --wrap=" # Use a better job name
-  #sys_command <- paste(sbatch_command, "'", blast_command, "'", sep = "")
+  sbatch_command <- "sbatch -p NMLResearch -c 1 --mem=1G -J %u-database_pipeline-%J --wrap=" # Use a better job name
+  sys_command <- paste(sbatch_command, "'", blast_command, "'", sep = "")
   try(system(sys_command)) # Blast command call
 
   info <- file.info(output_location)
