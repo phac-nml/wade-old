@@ -4,15 +4,15 @@
 \alias{rna_23s}
 \title{rRNA.R}
 \usage{
-rna_23s(org_id, sample_num)
+rna_23s(org_id, samples.df)
 }
 \arguments{
 \item{org_id}{Organism to query: GAS, PNEUMO or GONO}
 
-\item{sample_num}{Sample number or "list" or "folder" of sample numbers associated with VCF file(s)}
+\item{samples.df}{Data frame of user selected samples and the sample paths}
 }
 \value{
-A table frame containing the results of the query
+A data frame containing the results of the query
 }
 \description{
 rRNA.R
@@ -28,7 +28,7 @@ PNEUMO:
 Run SNP core pipeline with 23S_R6.fasta file: A2061G or C2613T
 
 Takes Organism, Sample Number and queries a contig.fasta
-#Parses 23s rRNA mutations from VCF files
+Parses 23s rRNA mutations from VCF files
 
 ON GALAXY:
 
