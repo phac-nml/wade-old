@@ -2,14 +2,14 @@
 #'
 #' Takes Organism, Sample Number, Locus, and a Variable at queries a contig.fasta file
 #' @param Org_id Organism to query: GAS, PNEUMO or GONO
-#' @param SampleNo Sample number associated with contig.fasta file
+#' @param samples.df Data frame of user selected samples and the sample paths
 #' @param locus Sample number associated with contig.fasta file
 
 #' @return A table frame containing the results of the query
 #' @export
 
-emm <- function(org_id, sample_num, locus){
-
+emm <- function(org_id, samples.df, locus){
+  
   # Directories ####
   contigs_dir <- here("data", "databases", org_id, "assemblies")
   lookup_dir <- here("data", "databases", org_id, "EMM", "allele_lkup_dna")
@@ -32,17 +32,19 @@ emm <- function(org_id, sample_num, locus){
   num_loci <- (dim(loci.df))[1]
 
   #  ---------------- Set up Sample list table ----------------
-  samples.df <- get_samples(org_id, sample_num)
+  #samples.df <- get_samples(org_id, sample_num)
   num_samples <- (dim(samples.df))[1]
 
   all_loci <- loci.df %>% pmap(~ .x) # Get the loci as a list
-  all_samples <- samples.df %>% pmap(~ .x) # Grab all the samples into a list
-  query_files <- all_samples %>% map(~ paste(contigs_dir, "/", .x, ".fasta", sep = "")) # get the path of samples
+  all_samples <- samples.df[,'filename']
+  
+  query_files <- file.path(samples.df[,"parent_dir"], samples.df[,"subdir_id"], samples.df[,"filename"])
 
   progress_frac <- 1/(length(all_samples)*length(all_loci))
 
   loci_dna_lookup <- all_loci %>% pmap(~ paste(lookup_dir, "/", .x, ".fasta", sep = ""))
 
+  
   blast_info <- query_files %>% map(function(x){ # Use the fastas on each loci and call emm_blastout
     if(file.exists(x)){
       # Need to check if the loci.fasta exists
