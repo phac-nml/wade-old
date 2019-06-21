@@ -1,8 +1,10 @@
 #' rRNA.R
 #'
 #' @param org_id Organism to query: GAS, PNEUMO or GONO
-#' @param sample_num Sample number or "list" or "folder" of sample numbers associated with VCF file(s)
-#' @return A table frame containing the results of the query
+#' @param samples.df Data frame of user selected samples and the sample paths
+#' 
+#' @return A data frame containing the results of the query
+#' 
 #' @details
 #' 23S rRNA pipeline for WGS assemblies to determine number of mutated alleles
 #'
@@ -15,7 +17,7 @@
 #' Run SNP core pipeline with 23S_R6.fasta file: A2061G or C2613T
 #'
 #' Takes Organism, Sample Number and queries a contig.fasta
-#' #Parses 23s rRNA mutations from VCF files
+#' Parses 23s rRNA mutations from VCF files
 #'
 #' ON GALAXY:
 #'
@@ -33,8 +35,7 @@
 #'
 #' @export
 
-rna_23s <- function(org_id, sample_num){
-
+rna_23s <- function(org_id, samples.df){
   # ------------------ Organism Variables ------------------
   rna_dir <- here("data/databases", org_id, "23S_rRNA")
   vcf_folder <- paste(rna_dir, "/VCF", sep = "")
@@ -42,7 +43,6 @@ rna_23s <- function(org_id, sample_num){
   switch(org_id,
          GONO = {
            chrom <- "23S4_NCCP11945"
-
            rRNA23S_pos1.df <- data.frame(CHROM = chrom,
                                          POS = 2045,
                                          stringsAsFactors = FALSE)
@@ -52,7 +52,6 @@ rna_23s <- function(org_id, sample_num){
          },
          PNEUMO = {
            chrom <- "23S_rRNA_R6_sprr02"
-
            rRNA23S_pos1.df <- data.frame(CHROM = chrom,
                                          POS = 2061)
            rRNA23S_pos2.df <- data.frame(CHROM = chrom,
@@ -61,24 +60,16 @@ rna_23s <- function(org_id, sample_num){
   )
 
   # ------------------ Setting up Data Frames ------------------
-  if(sample_num == "list") { # Get samples can only
-    samples.df <- read.csv(paste(rna_dir, "/list.csv", sep = ""))
-  } else {
-    samples.df <- data.frame(SampleNo = sample_num, Variable = NA)
-  }
-
-  num_samples <- (dim(samples.df))[1] # Number of samples from samples.df
-
   writeLines("\n23s rRNA counts from VCF") # Output ####
 
-  # Get a list of each sample.vcf
-  sample_list <- map(1:num_samples, ~ paste(samples.df[.x, "SampleNo"], ".vcf", sep = "")) # list of all the samples files
-  sample_paths <- map(sample_list, ~ paste(vcf_folder,"/", .x, sep = "")) # list of all the samples file paths
-
-  vcf_files.df <- map_df(sample_paths, ~ read_vcf(.x)) # Give path, get a data frame
+  # Get a list of sample.vcf
+  #   We replace the extension and then append the location of where the file should exist
+  vcf_paths <- samples.df["filename"] %>% map(~ file.path(vcf_folder, replace_file_ext(.x, ".vcf")))
+  
+  vcf_files.df <- unlist(vcf_paths) %>% map_df(~ read_vcf(.x)) # read the .vcf's and return a df
 
   # ------------------ Query Data Frames ------------------
-  values <- map(1:num_samples, function(x){ # Go through the rows of A SINGLE df
+  values <- map(1:nrow(vcf_files.df), function(x){ # Go through the rows of A SINGLE df
     frame <- vcf_files.df[x,]
 
     if(!is_empty(frame)){
@@ -99,11 +90,9 @@ rna_23s <- function(org_id, sample_num){
   output_profile.df <- data.frame() # Initialize Return Var ####
   output_profile.df <- bind_rows(output_profile.df, values)
 
-  #write_csv(output_profile.df, here("data", "output", "output_profile_23S.csv"))
   writeLines("rRNA23S_pipeline() Completed...")
 
   output_profile.df
-  #filter(output_profile.df, !(A2059G == 0 && C2611T == 0)) # Remove all 0, 0 columns
 }
 
 # ------------------ get_allele_fraction() ------------------
@@ -150,4 +139,9 @@ get_allele_fraction <- function(curr_vcf_frame, rna_pos){
   }
 
   val
+}
+
+replace_file_ext <- function(file, ext){
+  # Just get file sans extension (taken from tools::file_path_sans_ext(), don't want another full package dependency)
+  new_file <- paste(sub("([^.]+)\\.[[:alnum:]]+$", "\\1", file), ext, sep = "")
 }
