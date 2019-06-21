@@ -5,12 +5,12 @@
 \title{database_pipeline.R
 Generic Profiler : SampleNo_contigs.fasta vs. arg-annot/resfinder2/CARD or VFDB}
 \usage{
-database_pipeline(org_id, sample_num, is_vfdb)
+database_pipeline(org_id, samples.df, is_vfdb)
 }
 \arguments{
 \item{org_id}{Organism to query: GAS or GONO}
 
-\item{sample_num}{Sample number (or list of sample numbers) associated with contig.fasta file}
+\item{samples.df}{Data frame of user selected samples and the sample paths}
 
 \item{is_vfdb}{Boolean, determine which database is being used. Specified from main call}
 }
@@ -26,18 +26,9 @@ GAS AMR loci
 dfrF, dfrG, DHFR, ermA, ermB, ermT, folA, folP, gyrA, mefAE, msrD, parC, rpsJ, tetM, tetO
 note that ermA == ermTR, ermC == ermT, mefA/E includes mefA and mefE; DHFR is the same as folA
 
-ARG-ANNOT is a downloaded as a single multifasta. When a new download is made, on the Windows
-command prompt, naviate to :
-"L:\ GC_PAHO\ Whole_Genome_Sequencing\ WGS_Typing\ Resistance_Genes\ arg_annot"
-Then make BLAST index by running from command prompt: "makeblastdb -in arg-annot.fasta -dbtype nucl"
+ARG-ANNOT is a downloaded as a single multifasta
 
-RESFINDER is separated into antimicrobial classes.  Use Windows command prompt to navigate to
-"L:\ GC_PAHO\ Whole_Genome_Sequencing\ WGS_Typing\ Resistance_Genes\ resfinder2" folder, then run:
-"copy /b *.fsa resfinder2.fasta" to concatenate all into one multifasta.
-Then make BLAST index by running from command prompt: "makeblastdb -in resfinder2.fasta -dbtype nucl"
+RESFINDER is separated into antimicrobial classes
 
-VFDB is a downloaded from the web site as a single multifasta. When a new download is made, on the Windows
-command prompt, naviate to :
-"L:\ GC_PAHO\ Whole_Genome_Sequencing\ WGS_Typing\ VFDB \ "
-Then make BLAST index by running from command prompt: "makeblastdb -in VFDB.fasta -dbtype nucl"
+VFDB is a downloaded from the web site as a single multifasta
 }
