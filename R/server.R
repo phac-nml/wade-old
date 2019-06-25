@@ -49,15 +49,20 @@ server <- function(input, output, session){
     if(input$select_dataset != ''){ # Make sure that we have something selected first!
       
       data_hid.df <- dplyr::filter(all_data, name == input$select_dataset) # Grab the data that's been selected
-
+      
       # Take the first piece of data
       #   This could possibly be an issue since with collections there are multiple versions of the same data (by name).
       #   If one of the pieces of data we need are changed then things can possibly go wrong
       
-      # Let's check if the data is already downloaded.
-      datapath <- GalaxyConnector::gx_get(data_hid.df[1, 'hid'])
+      # Using [1,'hid'] because this will happen for each single data piece.
+      # With a collection it only needs the parent directory so grabbing the first hid will also work
+      datapath <- GalaxyConnector::gx_get(data_hid.df[1, 'hid']) 
       
       if(!is.null(datapath)){
+        sendSweetAlert(session = session,
+                       title = "Confirmed",
+                       text = "Data was added",
+                       type = "success")
         
         fullpath <- base::dirname(datapath) # Get everything up until the name of the data
         parent_dir <- base::dirname(fullpath) # Append dir_num so we can use list.files!
@@ -79,12 +84,16 @@ server <- function(input, output, session){
                               selected = samples)
         })
       } else {
-        # RAISE ERROR ####
+        # Show user 
+        sendSweetAlert(session = session,
+                       title = "Failed",
+                       text = "Data failed to load. Please make sure you have an internet connection. Otherwise try relaunching WADE.",
+                       type = "error")
       }
     }
     
   })
-
+  
   # Home tab ####
   ## Change the locus output depending on user input
   getLocus <- reactive({
@@ -111,20 +120,20 @@ server <- function(input, output, session){
     }
     samples
   })
-
+  
   output$selected_Org <- renderText({
     paste("Organism: ", input$org_tab_box)
   })
-
+  
   output$selected_test <- renderText({
     test_name <- paste(input$org_tab_box, "_test", sep = "")
     paste("Test:", input[[test_name]])
   })
-
+  
   output$entered_locus <- renderText({
     paste("Locus: ", getLocus())
   })
-
+  
   # Output Tab ####
   output$download_data <- downloadHandler(
     filename = function() { paste("test-", Sys.Date(), ".csv", sep = "") },
@@ -133,36 +142,21 @@ server <- function(input, output, session){
                   file)
     }
   )
-
-  # Main Call ####
-  observeEvent(input$execute, {
-    updateTabItems(session = session, # After "execute!" is pressed, change tabs to view the output
-                   inputId = "side_tabs",
-                   selected = "output")
-
-    locus <- getLocus()
-    samples <- getSamples() # We need to make sure that sample isn't empty.
-    print(samples)
-    org <- input$org_tab_box
-    test <- input[[paste(input$org_tab_box, "_test", sep = "")]] # Does this cause an issue?
-
-    output.df <- execute_analysis(org, samples, locus, test) # EXECUTE ANALYSIS
-    output$profile_table <- renderDataTable(output.df,
-                                            options = list(scrollX = TRUE,
-                                                           pageLength = 10)
-    )
-
-    final_out.df <<- output.df
-
-    # Output ####
-    file_out <<- here("data", "output", paste("output_profile_", test, ".csv", sep = "")) # Do we need this for downloading???
-    write.csv(x = output.df,
-              file = file_out,
-              row.names = F)
-
-
-
-    # Change Output UI ####
+  
+  #------------------
+  # CONFIRMATION CHECK
+  observeEvent(input$confirm_execution, {
+    if(isTRUE(input$confirm_execution)){
+      execute()
+    }
+  })
+  
+  #---------------------
+  # createDownloadButton
+  #
+  # Creates a download button
+  # TODO: Connect it to a file
+  createDownloadButton <- function(){
     output$download <- renderUI({ # Download Button ####
       box(id = "download_table",
           radioButtons("download_type", "File type:",
@@ -173,10 +167,27 @@ server <- function(input, output, session){
                        size = "lg")
       )
     })
-
+  }
+  
+  #------------------
+  # createOutputTable
+  #
+  # Renders a data a given data table
+  createOutputTable <- function(output.df){
+    renderDataTable(output.df,
+                    options = list(scrollX = TRUE,
+                                   pageLength = 10))
+  }
+  
+  #---------------
+  # createFilters
+  #
+  # render a UI object containing the filters
+  # of a given data frame
+  createFilters <- function(output.df){
     output$filter <- renderUI({ # Filter Boxes
       output_cols <- colnames(output.df)
-
+      
       if(output_cols %>% when(str_detect(., "_result")) %>% any()){
         filter_header <- output_cols[grepl("_result", output_cols)]
         filter_header <- gsub("_result", "", filter_header) %>%
@@ -185,7 +196,7 @@ server <- function(input, output, session){
       } else {
         filter_header <- output_cols
       }
-
+      
       box(id = "out_filter",
           prettyCheckboxGroup(inputId = "filter",
                               label = "Filter",
@@ -195,15 +206,59 @@ server <- function(input, output, session){
           )
       )
     })
-
+  }
+  
+  #-------------
+  # execute
+  #
+  # The "main" call.
+  # switches the session to the output tab to display output.
+  #
+  # execute() is called from the confirm_execution observeEvent. Only called when
+  # confirm is selected.
+  execute <- function(){
+    updateTabItems(session = session, # After "execute!" is pressed, change tabs to view the output
+                   inputId = "side_tabs",
+                   selected = "output")
+    
+    locus <- getLocus()
+    samples <- getSamples() # We need to make sure that sample isn't empty.
+    print(samples)
+    org <- input$org_tab_box
+    test <- input[[paste(input$org_tab_box, "_test", sep = "")]] # Does this cause an issue?
+    
+    output.df <- execute_analysis(org, samples, locus, test) # EXECUTE ANALYSIS
+    
+    output$profile_table <- createOutputTable(output.df)
+    
+    final_out.df <<- output.df
+    
+    # Output ####
+    file_out <<- here("data", "output", paste("output_profile_", test, ".csv", sep = "")) # Do we need this for downloading???
+    write.csv(x = output.df,
+              file = file_out,
+              row.names = F)
+    
+    createDownloadButton()
+    createFilters(output.df)
+  }
+  
+  observeEvent(input$execute, {
+    # Create a confirmation alert
+    shinyWidgets::confirmSweetAlert(session = session,
+                                    inputId = "confirm_execution",
+                                    title = "Confirm Execution?",
+                                    text = "Once confirmed it cannot be stopped!",
+                                    type = "question",
+                                    btn_labels = c("Cancel", "Confirm"))
   }) # End Main Call ####
-
+  
   # Output Filter ####
   observeEvent(input$filter, {
     vals <- input$filter # This is a list
     headers <- colnames(x = final_out.df) # Headers of the data table
     filters <- unlist(vals) %>% map(~ grep(.x, headers)) %>% unlist() # Get the columns that contain the vals from the filter
-
+    
     if(!is.null(vals)){ # Are there filters selected??
       output$profile_table <- renderDataTable(select(final_out.df, filters), # Do a select on the table
                                               options = list(scrollX = TRUE, # This render can probably be made into a small module
@@ -214,7 +269,7 @@ server <- function(input, output, session){
                                                              pageLength = 10))
     }
   }, ignoreNULL = FALSE) # Needed to detect any deselection to NULL
-
+  
   # Called from Main server call
   # Calls the correct analysis
   #
@@ -229,7 +284,7 @@ server <- function(input, output, session){
                    switch(test,
                           AMR_DB = { database_pipeline(org, samples, FALSE) },
                           AMR_LW = { labware_gono_amr() },
-                          EMM = { emm(org, sample, locus) },
+                          EMM = { emm(org, samples, locus) },
                           MASTER = { master_blastr(org, test, samples, locus) },
                           MLST = { general_mlst_pipeline(org, samples, locus, test) },
                           NGSTAR = { general_mlst_pipeline(org, samples, locus, test) },
