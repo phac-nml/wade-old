@@ -96,8 +96,6 @@ server <- function(input, output, session){
   
   observeEvent(input$select_all, {
     samples <- downloaded_samples.df %>% pull(filename)
-    print(samples)
-    
     updatePrettyCheckboxGroup(session = session,
                               inputId = "samples_check",
                               selected = samples)
@@ -105,7 +103,6 @@ server <- function(input, output, session){
   
   observeEvent(input$deselect_all, {
     samples <- "NA"
-    
     updatePrettyCheckboxGroup(session = session,
                               inputId = "samples_check",
                               selected = samples)
@@ -261,13 +258,21 @@ server <- function(input, output, session){
   }
   
   observeEvent(input$execute, {
-    # Create a confirmation alert
-    shinyWidgets::confirmSweetAlert(session = session,
-                                    inputId = "confirm_execution",
-                                    title = "Confirm Execution?",
-                                    text = "Once confirmed it cannot be stopped!",
-                                    type = "question",
-                                    btn_labels = c("Cancel", "Confirm"))
+    # If there is no data selected
+    if(getSamples() == ""){
+      shinyWidgets::sendSweetAlert(session = session,
+                                   title = "No Data Selected",
+                                   text = "Please select some data and try again",
+                                   type = "warning",
+                                   btn_labels = "Ok")
+    } else {
+      shinyWidgets::confirmSweetAlert(session = session,
+                                      inputId = "confirm_execution",
+                                      title = "Confirm Execution?",
+                                      text = "Once confirmed it cannot be stopped!",
+                                      type = "question",
+                                      btn_labels = c("Cancel", "Confirm"))
+    }
   }) # End Main Call ####
   
   # Output Filter ####
