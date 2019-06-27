@@ -94,6 +94,23 @@ server <- function(input, output, session){
     
   })
   
+  observeEvent(input$select_all, {
+    samples <- downloaded_samples.df %>% pull(filename)
+    print(samples)
+    
+    updatePrettyCheckboxGroup(session = session,
+                              inputId = "samples_check",
+                              selected = samples)
+  })
+  
+  observeEvent(input$deselect_all, {
+    samples <- "NA"
+    
+    updatePrettyCheckboxGroup(session = session,
+                              inputId = "samples_check",
+                              selected = samples)
+  })
+  
   # Home tab ####
   ## Change the locus output depending on user input
   getLocus <- reactive({

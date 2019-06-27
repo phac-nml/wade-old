@@ -128,7 +128,7 @@ ui <- dashboardPage(skin = "blue",
                                                                                     "Input locus query" = "input_loci"),
                                                                      selected = "list",
                                                                      animation = "smooth"
-
+                                                                     
                                                   ),
                                                   conditionalPanel( # selecting to input a loci will show the text input box
                                                     condition = "input.locus == 'input_loci'",
@@ -138,7 +138,7 @@ ui <- dashboardPage(skin = "blue",
                                          )
                                   )
                                 ), # End fluidRow
-
+                                
                                 fluidRow(
                                   box(id = "selected_output",
                                       textOutput("selected_Org"),
@@ -146,14 +146,16 @@ ui <- dashboardPage(skin = "blue",
                                       textOutput("entered_locus")
                                   ),
                                   box(id = "samples",
-                                      collapsible = TRUE,
-                                      collapsed = TRUE,
                                       title = h2("Samples"),
+                                      actionButton(inputId = "select_all",
+                                                   label = "Select All"),
+                                      actionButton(inputId = "deselect_all",
+                                                   label = "Deselect All"),
                                       uiOutput("sample_selection")
                                   )
                                 )
                         ), # End Home tab
-
+                        
                         # Output tab content
                         tabItem(tabName = "output",
                                 dataTableOutput(outputId = "profile_table"),
@@ -161,7 +163,7 @@ ui <- dashboardPage(skin = "blue",
                                 uiOutput("download"),
                                 uiOutput("filter")
                         ),
-
+                        
                         # Settings tab content
                         tabItem(tabName = "settings",
                                 h2("Settings"),
