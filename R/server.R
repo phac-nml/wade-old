@@ -163,10 +163,14 @@ server <- function(input, output, session){
   
   # Output Tab ####
   output$download_data <- downloadHandler(
-    filename = function() { paste("test-", Sys.Date(), ".csv", sep = "") },
+    filename = function() { paste("test-", Sys.Date(), ".", input$download_type, sep = "") },
     content = function(file) {
-      write.table(x = read_table(file_out),
-                  file)
+      sep <- switch(input$download_type, "csv" = ",", "tsv" = "\t")
+      write.table(x = final_out.df,
+                  file,
+                  row.names = FALSE,
+                  sep = sep,
+                  qmethod = "escape")
     }
   )
   
@@ -182,11 +186,11 @@ server <- function(input, output, session){
   # createDownloadButton
   #
   # Creates a download button
-  # TODO: Connect it to a file
   createDownloadButton <- function(){
     output$download <- renderUI({ # Download Button ####
       box(id = "download_table",
-          radioButtons("download_type", "File type:",
+          radioButtons(inputId = "download_type", 
+                       label = "File type:",
                        choices = c("csv", "tsv")),
           downloadBttn(outputId = "download_data",
                        label = "Download",
