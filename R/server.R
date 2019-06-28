@@ -260,15 +260,19 @@ server <- function(input, output, session){
     
     output.df <- execute_analysis(org, samples, locus, test) # EXECUTE ANALYSIS
     
-    output$profile_table <- createOutputTable(output.df)
     
-    final_out.df <<- output.df
+    output$profile_table <- createOutputTable(output.df) # Update the output tab
+    
+    final_out.df <<- output.df # Update our global data frame
     
     # Output ####
-    file_out <<- here("data", "output", paste("output_profile_", test, ".csv", sep = "")) # Do we need this for downloading???
-    write.csv(x = output.df,
+    filename <- paste("output_profile_", test, ".csv", sep="")
+    file_out <<- here("data", "output", filename)
+    write.csv(x = output.df, # Write file
               file = file_out,
-              row.names = F)
+              row.names = FALSE)
+    
+    GalaxyConnector::gx_put(file_out, filename) # Writes the file to Galaxy
     
     createDownloadButton()
     createFilters(output.df)
@@ -319,7 +323,6 @@ server <- function(input, output, session){
   execute_analysis <- function(org, samples, locus, test){
     withProgress(message = "Work in progress...",
                  value = 0, {
-
                    switch(test,
                           AMR_DB = { database_pipeline(org, samples, FALSE) },
                           AMR_LW = { labware_gono_amr() },
