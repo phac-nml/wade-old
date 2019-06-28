@@ -50,45 +50,58 @@ server <- function(input, output, session){
       
       data_hid.df <- dplyr::filter(all_data, name == input$select_dataset) # Grab the data that's been selected
       
-      # Take the first piece of data
-      #   This could possibly be an issue since with collections there are multiple versions of the same data (by name).
-      #   If one of the pieces of data we need are changed then things can possibly go wrong
-      
-      # Using [1,'hid'] because this will happen for each single data piece.
-      # With a collection it only needs the parent directory so grabbing the first hid will also work
-      datapath <- GalaxyConnector::gx_get(data_hid.df[1, 'hid']) 
-      
-      if(!is.null(datapath)){
-        sendSweetAlert(session = session,
-                       title = "Confirmed",
-                       text = "Data was added",
-                       type = "success")
+      if(dim(data_hid.df)[1] != 0){
         
-        fullpath <- base::dirname(datapath) # Get everything up until the name of the data
-        parent_dir <- base::dirname(fullpath) # Append dir_num so we can use list.files!
-        dir_num <- base::basename(fullpath) # Get only the directory the data exists to use for tidy data
+        # Take the first piece of data
+        #   This could possibly be an issue since with collections there are multiple versions of the same data (by name).
+        #   If one of the pieces of data we need are changed then things can possibly go wrong
         
-        combine.df <- data.frame("parent_dir" = parent_dir, "subdir_id" = dir_num, "filename" = list.files(fullpath), stringsAsFactors = FALSE)
-        downloaded_samples.df <<- rbind(downloaded_samples.df, combine.df) # We need to change it globally. Could also use a reactive?
-        print(downloaded_samples.df)
+        # Using [1,'hid'] because this will happen for each single data piece.
+        # With a collection it only needs the parent directory so grabbing the first hid will also work
+        datapath <- GalaxyConnector::gx_get(data_hid.df[1, 'hid']) 
         
-        # Use our downloaded data frame
-        samples <- downloaded_samples.df %>% pull(filename)
-        
-        output$sample_selection <- renderUI({
-          prettyCheckboxGroup(inputId = "samples_check",
-                              label = "",
-                              inline = TRUE,
-                              status = "info",
-                              choices = samples,
-                              selected = samples)
-        })
-      } else {
-        # Show user 
-        sendSweetAlert(session = session,
-                       title = "Failed",
-                       text = "Data failed to load. Please make sure you have an internet connection. Otherwise try relaunching WADE.",
-                       type = "error")
+        if(!is.null(datapath)){
+          fullpath <- base::dirname(datapath) # Get everything up until the name of the data
+          parent_dir <- base::dirname(fullpath) # Append dir_num so we can use list.files!
+          dir_num <- base::basename(fullpath) # Get only the directory the data exists to use for tidy data
+          
+          combine.df <- data.frame("parent_dir" = parent_dir, "subdir_id" = dir_num, "filename" = list.files(fullpath), stringsAsFactors = FALSE) %>% 
+            dplyr::filter(!(filename %in% unlist(downloaded_samples.df["filename"]))) # Filter out selected data (works with collections here)
+          
+          if(dim(combine.df)[1] != 0){
+            downloaded_samples.df <<- rbind(downloaded_samples.df, combine.df) # We need to change it globally. Could also use a reactive?
+            
+            # Use our downloaded data frame
+            samples <- downloaded_samples.df %>% pull(filename)
+            
+            sendSweetAlert(session = session,
+                           title = "Confirmed",
+                           text = "Data was added",
+                           type = "success",
+                           showCloseButton = FALSE)
+            
+            output$sample_selection <- renderUI({
+              prettyCheckboxGroup(inputId = "samples_check",
+                                  label = "",
+                                  inline = TRUE,
+                                  status = "info",
+                                  choices = samples,
+                                  selected = samples)
+          
+            })
+          } else {
+            sendSweetAlert(session = session,
+                           title = "Data Already Added",
+                           text = "The data already exists",
+                           type = "info")
+          }
+        } else {
+          # Show user 
+          sendSweetAlert(session = session,
+                         title = "Failed",
+                         text = "Data failed to load. Please make sure you have an internet connection. Otherwise try relaunching WADE.",
+                         type = "error")
+        }
       }
     }
     
@@ -126,7 +139,7 @@ server <- function(input, output, session){
   getSamples <- reactive({ # getSamples() will return a data frame
     samples <- "" # start as empty
     
-    print(input$samples_check)
+    #print(input$samples_check)
     if(!is.null(input$samples_check) && !purrr::is_empty(input$samples_check)){
       if(downloadedDim()[1] > 0 && downloadedDim()[2] > 0){ # Is there actually data that we can use?
         samples <- dplyr::filter(downloaded_samples.df, filename %in% input$samples_check)
@@ -237,7 +250,7 @@ server <- function(input, output, session){
     
     locus <- getLocus()
     samples <- getSamples() # We need to make sure that sample isn't empty.
-    print(samples)
+    #print(samples)
     org <- input$org_tab_box
     test <- input[[paste(input$org_tab_box, "_test", sep = "")]] # Does this cause an issue?
     
