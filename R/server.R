@@ -87,7 +87,7 @@ server <- function(input, output, session){
                                   status = "info",
                                   choices = samples,
                                   selected = samples)
-          
+              
             })
           } else {
             sendSweetAlert(session = session,
@@ -139,7 +139,6 @@ server <- function(input, output, session){
   getSamples <- reactive({ # getSamples() will return a data frame
     samples <- "" # start as empty
     
-    #print(input$samples_check)
     if(!is.null(input$samples_check) && !purrr::is_empty(input$samples_check)){
       if(downloadedDim()[1] > 0 && downloadedDim()[2] > 0){ # Is there actually data that we can use?
         samples <- dplyr::filter(downloaded_samples.df, filename %in% input$samples_check)
@@ -280,7 +279,7 @@ server <- function(input, output, session){
   
   observeEvent(input$execute, {
     # If there is no data selected
-    if(getSamples() == ""){
+    if(is.null(getSamples()[1,1]) || getSamples()[1,1] == ""){
       shinyWidgets::sendSweetAlert(session = session,
                                    title = "No Data Selected",
                                    text = "Please select some data and try again",
