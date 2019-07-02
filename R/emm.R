@@ -102,13 +102,15 @@ emm <- function(org_id, samples.df, locus){
 #
 # create .csv's based on the given parameters
 write_emm_output <- function(write_blast, blast.df, sample.df, org_id){
+  datetime <- format(Sys.time(), "%Y-%m-%d_%X")
+  
   if(write_blast){
-    write.csv(blast.df, here("data", "output", "output_profile_emm_blast.csv"), row.names = FALSE)
+    write.csv(blast.df, here("data", "output", paste(datetime, "_emm_blast.csv", sep=""), row.names = FALSE))
   } else {
-    write.csv(sample.df, here("data", "output", "output_profile_emm.csv"), quote = FALSE, row.names = FALSE)
+    write.csv(sample.df, here("data", "output", paste(datetime, "_emm.csv", sep=""), quote = FALSE, row.names = FALSE))
   }
   
-  write.csv(sample.df, here("data", "output", "LabWareUpload_GAS_emm.csv"), quote = FALSE, row.names = FALSE)
+  write.csv(sample.df, here("data", "output", paste(datetime, "_LabWareUpload_GAS_emm.csv", sep=""), quote = FALSE, row.names = FALSE))
   
   writeLines("DONE: EMM_pipeline()")
 }
