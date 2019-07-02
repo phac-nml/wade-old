@@ -202,6 +202,10 @@ master_blastr <- function(org_id, test_id, sample_num, locus_id){
         con <- file(output_location, open="r")
         linn <- readLines(con)
         close(con)
+        
+        #----- Removing Files -----
+        file.remove(db_dir) # Remove the copied db_dir
+        file.remove(output_location) # Remove the blast output since we've read it into linn
 
         #check if gene was found in BLAST
         blast_result <- NA
