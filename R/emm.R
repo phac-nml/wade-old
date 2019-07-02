@@ -14,7 +14,6 @@ emm <- function(org_id, samples.df, locus){
   contigs_dir <- here("data", "databases", org_id, "assemblies")
   lookup_dir <- here("data", "databases", org_id, "EMM", "allele_lkup_dna")
   all_loci <- here("data", "databases", org_id, "EMM", "temp", "loci.csv")
-  dest_file <- here("data", "output", "temp", "queryfile.fasta")
   blast_out_file <- here("data", "output", "temp", "blastout.csv")
 
   # ---------------- Variables ----------------
