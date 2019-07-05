@@ -1,4 +1,6 @@
 library(shinydashboard)
+library(shiny)
+library(shinyWidgets)
 
 #' Function building dashboard UI, used in Shiny app
 #' 
@@ -71,7 +73,7 @@ ui <- dashboardPage(skin = "blue",
                                                                                       "ARG-ANNOT/Resfinder/CARD" = "AMR_DB",
                                                                                       "VFDB (Virulence Factor Database)" = "VFDB"
                                                                                       #"LabWare Metrics" = "LW_METRICS"
-
+                                                                                      
                                                                      ), decreasing = FALSE),
                                                                      selected = "AMR",
                                                                      animation = "smooth"
@@ -88,7 +90,7 @@ ui <- dashboardPage(skin = "blue",
                                                                                       "NG-MAST Type" = "NGMAST",
                                                                                       "MasterBlastR*" = "MASTER"
                                                                                       #"LabWare Metrics" = "LW_METRICS"
-
+                                                                                      
                                                                      ), decreasing = FALSE),
                                                                      selected = "AMR",
                                                                      animation = "smooth"
