@@ -2,10 +2,13 @@
 
 export(Index_pipeline)
 export(PneumoCaT_pipeline)
+export(dataInputModule)
+export(dataInputModuleUI)
 export(database_pipeline)
 export(emm)
 export(general_mlst_pipeline)
 export(get_labware_dataframe)
+export(get_samples)
 export(labware_gas_amr)
 export(labware_gas_toxins)
 export(labware_gono_amr)
