@@ -2,8 +2,6 @@
 
 export(Index_pipeline)
 export(PneumoCaT_pipeline)
-export(dataInputModule)
-export(dataInputModuleUI)
 export(database_pipeline)
 export(emm)
 export(general_mlst_pipeline)
