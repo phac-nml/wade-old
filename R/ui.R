@@ -1,6 +1,7 @@
 library(shinydashboard)
 library(shiny)
 library(shinyWidgets)
+library(shinyFiles)
 
 #' Function building dashboard UI, used in Shiny app
 #' 
@@ -136,7 +137,11 @@ ui <- dashboardPage(skin = "blue",
                                                     condition = "input.locus == 'input_loci'",
                                                     textInput(inputId = "user_locus", label = "Enter a locus to query", value = "")
                                                     # Should this maybe be textAreaInput? That way they can expand it if they wish?
-                                                  )
+                                                  ),
+                                                  shinyFiles::shinyDirButton(id = "loci_upload",
+                                                                             label = "Upload Loci",
+                                                                             title = "Select a File/Folder to upload"
+                                                                             )
                                          )
                                   )
                                 ), # End fluidRow
