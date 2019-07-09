@@ -159,11 +159,11 @@ server <- function(input, output, session){
     paste("Locus: ", getLocus())
   })
   
-  shinyDirChoose(input,
-                 id = "loci_upload",
-                 root=c(root="/home"),
-                 filetypes=c('')
-                 )
+  shinyFiles::shinyDirChoose(input,
+                             id = "loci_upload",
+                             root=c(root="."),
+                             filetypes=c('')
+                             )
   
   observeEvent(input$loci_upload, {
     print(input$loci_upload)
