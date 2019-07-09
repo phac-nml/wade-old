@@ -77,8 +77,7 @@ server <- function(input, output, session){
             sendSweetAlert(session = session,
                            title = "Confirmed",
                            text = "Data was added",
-                           type = "success",
-                           showCloseButton = FALSE)
+                           type = "success")
             
             output$sample_selection <- renderUI({
               prettyCheckboxGroup(inputId = "samples_check",
@@ -158,6 +157,16 @@ server <- function(input, output, session){
   
   output$entered_locus <- renderText({
     paste("Locus: ", getLocus())
+  })
+  
+  shinyDirChoose(input,
+                 id = "loci_upload",
+                 root=c(root="/home"),
+                 filetypes=c('')
+                 )
+  
+  observeEvent(input$loci_upload, {
+    print(input$loci_upload)
   })
   
   # Output Tab ####
