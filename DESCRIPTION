@@ -10,12 +10,13 @@ LazyData: true
 RoxygenNote: 6.1.1.9000
 Imports:
     devtools,
+    dplyr,
+    GalaxyConnector,
+    here,
+    purrr,
     shiny,
     shinydashboard,
     shinyFiles,
     shinyWidgets,
-    tidyverse,
-    here,
-    GalaxyConnector
 Suggests: 
 	testthat
