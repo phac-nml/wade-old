@@ -5,6 +5,7 @@ MAINTAINER Adrian Zetner "adrian.zetner@canada.ca"
 RUN apt-get update && apt-get install -y \
     sudo \
     gdebi-core \
+	ncbi-blast+ \
 	net-tools \
     pandoc \
     pandoc-citeproc \
@@ -40,7 +41,7 @@ RUN R -e "remotes::install_github('justinband/r-galaxy-connector', ref='pavian')
 # Install wade from github
 # 	From 'galaxy' branch
 # 	Use ref= to specify the branch to download. Removing ref= defaults to master
-RUN R -e "remotes::install_github('phac-nml/wade')"
+RUN R -e "remotes::install_github('phac-nml/wade', ref='dev')"
 
 COPY shiny-server.conf  /etc/shiny-server/shiny-server.conf
 RUN rm -f /srv/shiny-server/*
@@ -48,6 +49,9 @@ RUN rm -f /srv/shiny-server/*
 # Move pavians app.R file into /srv/shiny-server/ to be launched
 RUN R -e "sapply(list.files(system.file('shinyapp',package='wade'),full.names=TRUE),file.copy,to='/srv/shiny-server/',recursive=TRUE)"
 
+RUN R -e "install.packages('rappdirs')"
+
+# Copy some files over
 COPY shiny-server.sh /usr/bin/shiny-server.sh
 COPY monitor_traffic.sh /monitor_traffic.sh
 
