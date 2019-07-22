@@ -51,11 +51,11 @@ emm <- function(org_id, samples.df, locus){
                   message = paste("Executing emm blast on ", basename(x), sep=""))
       
       emm_blastout(x, loci_dna_lookup, blast_out_file) # How can we do this if there are multiple loci?
-      info = file.info(blast_out_file)
+      info = file.info(blast_out_file) # Pull the info even if there is none
       
-      if(info$size == 0){
+      if(is.na(info$size)){ # There's nothing to be read!
         writeLines("Blast file not found!")
-      } else {
+      } else { # There is file information so read it
         new_blast <- read.csv(blast_out_file,
                                  header = FALSE,
                                  sep = "\t",
@@ -102,15 +102,15 @@ emm <- function(org_id, samples.df, locus){
 #
 # create .csv's based on the given parameters
 write_emm_output <- function(write_blast, blast.df, sample.df, org_id){
-  datetime <- format(Sys.time(), "%Y-%m-%d_%X")
+  datetime <- format(Sys.time(), "%Y-%m-%d")
   
   if(write_blast){
-    write.csv(blast.df, here("data", "output", paste(datetime, "_emm_blast.csv", sep=""), row.names = FALSE))
+    write.csv(blast.df[[1]], here("data", "output", paste(datetime, "_emm_blast.csv", sep="")), row.names = FALSE)
   } else {
-    write.csv(sample.df, here("data", "output", paste(datetime, "_emm.csv", sep=""), quote = FALSE, row.names = FALSE))
+    write.csv(sample.df, here("data", "output", paste(datetime, "_emm.csv", sep=""), quote = FALSE), row.names = FALSE)
   }
   
-  write.csv(sample.df, here("data", "output", paste(datetime, "_LabWareUpload_GAS_emm.csv", sep=""), quote = FALSE, row.names = FALSE))
+  write.csv(sample.df, here("data", "output", paste(datetime, "_LabWareUpload_GAS_emm.csv", sep="")), quote = FALSE, row.names = FALSE)
   
   writeLines("DONE: EMM_pipeline()")
 }
