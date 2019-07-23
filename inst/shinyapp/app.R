@@ -9,6 +9,7 @@ library(shiny)
 library(shinydashboard)
 library(shinyFiles)
 library(shinyWidgets)
+library(stringr)
 
 if(!require(wade)){
   options(repos = c(CRAN = "http://cran.rstudio.com"))
