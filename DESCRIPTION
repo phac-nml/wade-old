@@ -18,5 +18,6 @@ Imports:
     shinydashboard,
     shinyFiles,
     shinyWidgets,
+    stringr
 Suggests: 
 	testthat
