@@ -13,8 +13,8 @@ emm <- function(org_id, samples.df, locus){
   # Directories ####
   contigs_dir <- here("data", "databases", org_id, "assemblies")
   lookup_dir <- here("data", "databases", org_id, "EMM", "allele_lkup_dna")
-  all_loci <- here("data", "databases", org_id, "EMM", "temp", "loci.csv")
-  blast_out_file <- here("data", "output", "temp", "blastout.csv")
+  all_loci <- here("data", "databases", org_id, "EMM", "temp", "loci.csv") # Location of the loci
+  blast_out_file <- here("data", "output", "blastout.csv") # A temporary location to hold the blast output (Is deleted later)
 
   # ---------------- Variables ----------------
   error <- "Sample_Err"
@@ -31,7 +31,6 @@ emm <- function(org_id, samples.df, locus){
   num_loci <- (dim(loci.df))[1]
   
   #  ---------------- Set up Sample list table ----------------
-  #samples.df <- get_samples(org_id, sample_num)
   num_samples <- (dim(samples.df))[1]
   
   all_loci <- loci.df %>% pmap(~ .x) # Get the loci as a list
@@ -39,7 +38,7 @@ emm <- function(org_id, samples.df, locus){
   
   query_files <- file.path(samples.df[,"parent_dir"], samples.df[,"subdir_id"], samples.df[,"filename"])
   
-  progress_frac <- 1/(length(all_samples)*length(all_loci))
+  progress_frac <- 1/(length(all_samples)*length(all_loci)) # Determine the incProgress increment amount
   
   loci_dna_lookup <- all_loci %>% pmap(~ paste(lookup_dir, "/", .x, ".fasta", sep = ""))
   
@@ -50,16 +49,18 @@ emm <- function(org_id, samples.df, locus){
       incProgress(amount = progress_frac,
                   message = paste("Executing emm blast on ", basename(x), sep=""))
       
-      emm_blastout(x, loci_dna_lookup, blast_out_file) # How can we do this if there are multiple loci?
-      info = file.info(blast_out_file) # Pull the info even if there is none
+      # Perform and Read blast
+      outpath <- emm_blastout(x, loci_dna_lookup, blast_out_file) # How can we do this if there are multiple loci?
+      info <- file.info(outpath) # Pull the info even if there is none
+      file.remove(outpath) # Remove the file after using it
       
       if(is.na(info$size)){ # There's nothing to be read!
         writeLines("Blast file not found!")
       } else { # There is file information so read it
         new_blast <- read.csv(blast_out_file,
-                                 header = FALSE,
-                                 sep = "\t",
-                                 stringsAsFactors = FALSE)
+                              header = FALSE,
+                              sep = "\t",
+                              stringsAsFactors = FALSE)
         names(new_blast) <- blast_names
         new_blast
       }
@@ -104,17 +105,18 @@ emm <- function(org_id, samples.df, locus){
 write_emm_output <- function(write_blast, blast.df, sample.df, org_id){
   datetime <- format(Sys.time(), "%Y-%m-%d")
   
+  # Multiple output locations
   emm_blast_file <- here("data", "output", paste(datetime, "_emm_blast.csv", sep=""))
   emm_file <- here("data", "output", paste(datetime, "_emm.csv", sep=""), quote = FALSE)
   emm_labware_file <- here("data", "output", paste(datetime, "_LabWareUpload_GAS_emm.csv", sep=""))
   
-  if(write_blast){
+  if(write_blast){ # We only write the blast when there is one file
     write.csv(blast.df[[1]], emm_blast_file, row.names = FALSE)
-  } else {
+  } else { # Otherwise just write E V E R Y T H I N G
     write.csv(sample.df, emm_file, row.names = FALSE)
   }
   
-  write.csv(sample.df, emm_labware_file, quote = FALSE, row.names = FALSE)
+  write.csv(sample.df, emm_labware_file, quote = FALSE, row.names = FALSE) # Always write a LabwareOutput
   
   writeLines("DONE: EMM_pipeline()")
 }
@@ -124,10 +126,16 @@ write_emm_output <- function(write_blast, blast.df, sample.df, org_id){
 #
 # Perform a blastout command which produces a table
 #
-# RETURN: returns a data frame of the blastout
+# RETURN: returns the path to the blast .csv output
 emm_blastout <- function(dest, database, output){
-  blast_command <- paste("blastn -query ", dest, " -db ", database, " -out ", output, " -num_alignments 10 -evalue 10e-50 -outfmt 6")
-  try(system(blast_command))
+  file.create(output) # Create the output first
+  
+  if(file.exists(output)){ # Save some time and run only if it creates successfully
+    blast_command <- paste("blastn -query ", dest, " -db ", database, " -out ", output, " -num_alignments 10 -evalue 10e-50 -outfmt 6")
+    try(system(blast_command)) # Run the blast command!
+  }
+  
+  output # Return the output path
 }
 
 # ------------------------------------
