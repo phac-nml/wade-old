@@ -44,6 +44,8 @@ emm <- function(org_id, samples.df, locus){
   
   
   blastout.df <- query_files %>% map(function(x){ # Use the fastas on each loci and call emm_blastout
+    new_blast <- data.frame()
+    
     if(file.exists(x)){
       # Need to check if the loci.fasta exists
       incProgress(amount = progress_frac,
@@ -61,11 +63,11 @@ emm <- function(org_id, samples.df, locus){
                               sep = "\t",
                               stringsAsFactors = FALSE)
         names(new_blast) <- blast_names
-        new_blast
+        #new_blast
       }
+      file.remove(outpath) # Remove the file after using it
     }
-    
-    file.remove(outpath) # Remove the file after using it
+    new_blast
   })
   
   # We map2_dfr here because we want some sort of order
