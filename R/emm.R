@@ -104,8 +104,11 @@ emm <- function(org_id, samples.df, locus){
 write_emm_output <- function(write_blast, blast.df, sample.df, org_id){
   datetime <- format(Sys.time(), "%Y-%m-%d")
   
-  system("ls -l")
-  system("ls -l data/output/")
+  print(system("ls -l"))
+  print(system("ls -l data/output/"))
+  system("chown -R root:root data/")
+  print(system("ls -l"))
+  print(system("ls -l data/output/"))
   emm_blast_file <- here("data", "output", paste(datetime, "_emm_blast.csv", sep=""))
   emm_file <- here("data", "output", paste(datetime, "_emm.csv", sep=""), quote = FALSE)
   emm_labware_file <- here("data", "output", paste(datetime, "_LabWareUpload_GAS_emm.csv", sep=""))
@@ -116,7 +119,7 @@ write_emm_output <- function(write_blast, blast.df, sample.df, org_id){
     write.csv(sample.df, emm_file, row.names = FALSE)
   }
   
-  system("ls -l data/output/")
+  print(system("ls -l data/output/"))
   
   write.csv(sample.df, emm_labware_file, quote = FALSE, row.names = FALSE)
   
