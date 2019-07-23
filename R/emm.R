@@ -52,7 +52,6 @@ emm <- function(org_id, samples.df, locus){
       # Perform and Read blast
       outpath <- emm_blastout(x, loci_dna_lookup, blast_out_file) # How can we do this if there are multiple loci?
       info <- file.info(outpath) # Pull the info even if there is none
-      file.remove(outpath) # Remove the file after using it
       
       if(is.na(info$size)){ # There's nothing to be read!
         writeLines("Blast file not found!")
@@ -65,6 +64,8 @@ emm <- function(org_id, samples.df, locus){
         new_blast
       }
     }
+    
+    file.remove(outpath) # Remove the file after using it
   })
   
   # We map2_dfr here because we want some sort of order
