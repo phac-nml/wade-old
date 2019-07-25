@@ -268,7 +268,6 @@ server <- function(input, output, session){
     
     output.df <- execute_analysis(org, samples, locus, test) # EXECUTE ANALYSIS
     
-    
     output$profile_table <- createOutputTable(output.df) # Update the output tab
     
     final_out.df <<- output.df # Update our global data frame
@@ -288,7 +287,7 @@ server <- function(input, output, session){
   
   observeEvent(input$execute, {
     # If there is no data selected
-    if(is.null(getSamples()[1,1]) || getSamples()[1,1] == ""){
+    if(getSamples() == "" || is.null(getSamples()[1,1]) || getSamples()[1,1] == ""){
       shinyWidgets::sendSweetAlert(session = session,
                                    title = "No Data Selected",
                                    text = "Please select some data and try again",
