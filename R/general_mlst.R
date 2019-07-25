@@ -97,7 +97,9 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
           return(sample_error.df)
         }
         
-        blast_out_file <- "blastout.txt" # Still need a finalized location
+        blast_out_file <- "blastout.txt" # Use this as a temporary location, it'll get deleted later.
+        file.create(blast_out_file) # Create output file. Blast needs the file to exist first.
+        
         blast_command <- paste("blastn -db ", locus_dna_lookup, "-query ", dest_file, " -out ", blast_out_file, " -num_alignments 10 -evalue 10e-175 -outfmt 6")
         try(system(blast_command))
         
