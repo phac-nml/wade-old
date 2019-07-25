@@ -64,6 +64,9 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
     curr_file <- file.path(samples.df[i, "parent_dir"], samples.df[i, "subdir_id"], samples.df[i, "filename"])
     
     dest_file <- here("data", "queryfile.fasta") # Still need a finalized location
+    if(!file.exists(dest_file)){
+      file.create(dest_file) # If it doesn't exist yet just create it.
+    }
     
     if(!file.copy(curr_file, dest_file, overwrite = TRUE)){
       allele <- "Sample Number Error" # Do we need this?
@@ -100,10 +103,7 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
         
         blast_info <- file.info(blast_out_file) # get the results from the blast command
         
-        #------ REMOVE FILES -------
-        file.remove(blast_out_file) # Delete the blast file
-        file.remove(dest_file) # Delete the copied .fasta
-        
+        print(blast_info)
         if(blast_info$size == 0){
           allele <- "No gene present"
           allele_num <- "0"
@@ -128,8 +128,6 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
                                    "AlleleEnd",
                                    "eValue",
                                    "bit")
-          
-          
           
           if(seq_type == "NGSTAR"){
             # ---> difference in NGSTAR here <---
@@ -193,6 +191,11 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
       }
     } # End Locus Loop ####
     
+    #------ REMOVE FILES -------
+    # We remove these files after our looping
+    file.remove(blast_out_file) # Delete the blast file
+    file.remove(dest_file) # Delete the copied .fasta
+    
     if(locus == "list"){
       # ----------- lookup profiles
       profiles_copy.df <- data.frame(profiles.df)
@@ -201,7 +204,8 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
         profiles_copy.df <- filter(profiles_copy.df, profiles_copy.df[,m] == curr_output.df[1, m+1]) # what are we doing here?
       }
       
-      if(is.empty(profiles_copy.df)){ # If there is no info then ST of course is NA
+      copy_dim <- dim(profiles_copy.df)
+      if(is.null(copy_dim) || copy_dim[1] == 0 || copy_dim[2] == 0){
         ST <- NA # Set sequence typing to NA because?
         mlst_type.df <- data.frame(ST, stringsAsFactors = FALSE)
         curr_output.df <- bind_cols(curr_output.df, mlst_type.df) # ADDED ####
