@@ -44,26 +44,26 @@ database_pipeline <- function(org_id, samples.df, is_vfdb){
   write.csv(x = output.df,
             file = here("data", "DB_PIPELINE_OUT.tsv"),
             row.names = FALSE)
-
+  
   writeLines("DONE: database_pipeline() finished....")
   output.df
 }
 
 execute_blastout <- function(curr_db, sample, inc_amount){
   sample_num <- basename(sample) # Vector of sample names .fasta
-
+  
   incProgress(amount = inc_amount,
               message = paste("Blasting ", sample_num, " against ", curr_db, sep = ""))
-
+  
   writeLines(paste("Executing blastn for:", sample_num, "on db", curr_db))
   headers <- c("SampleNo", "DataBase", "GeneID", "MatchID")
-
+  
   if(curr_db == "VFDB"){
     blast_evalue <- "10e-50"
   } else {
     blast_evalue <- "10e-100"
   }
-
+  
   # DATABASE ACCESS ####
   db_dir <- here("data", "databases", curr_db, paste(curr_db, ".fasta", sep = "")) # data/databases/curr_db/curr_db.fasta
   output_location <- here("data", "databases", curr_db, paste(curr_db, "_blast_out.tsv", sep = "")) # data/curr_db/curr_db.fasta
@@ -71,28 +71,29 @@ execute_blastout <- function(curr_db, sample, inc_amount){
   #-------------
   # using "-outfmt 6" in the blast command provides us with an output table to read from. This there's no need to
   #   parse through a file, line by painful line.
-  # blast_command <- paste("blastn -db ", db_dir, " -query ",
-  #                        sample, " -outfmt 6 -out ", output_location, " -evalue ", blast_evalue, sep = "")
-  # sys_command <- blast_command
-
+  blast_command <- paste("blastn -db ", db_dir, " -query ",
+                         sample, " -outfmt 6 -out ", output_location, " -evalue ", blast_evalue, sep = "")
+  sys_command <- blast_command
+  
   # If batch command is needed ####  
-  sbatch_command <- "sbatch -p NMLResearch -c 1 --mem=1G -J %u-database_pipeline-%J --wrap=" # Use a better job name
-  sys_command <- paste(sbatch_command, "'", blast_command, "'", sep = "")
+  # sbatch_command <- "sbatch -p NMLResearch -c 1 --mem=1G -J %u-database_pipeline-%J --wrap=" # Use a better job name
+  # sys_command <- paste(sbatch_command, "'", blast_command, "'", sep = "")
+  
   try(system(sys_command)) # Blast command call
-
+  
   info <- file.info(output_location)
-
+  
   if(!is.na(info) && info$size > 0){
     # Read the table to get both the GeneID and MatchID
     table <- read.table(file = output_location, stringsAsFactors = FALSE)
     curr_blast_table.df <- select(table, "V1", "V2")
     names(curr_blast_table.df) <- c("GeneID", "MatchID")
-
+    
     # Add the SampleNo and DataBase
     curr_blast_table.df <- mutate(curr_blast_table.df,
                                   "SampleNo" = sample_num,
                                   "DataBase" = curr_db)
-
+    
     curr_blast_table.df[, headers] # Order by headers
   } else {
     curr_blast_table.df <- data.frame()
