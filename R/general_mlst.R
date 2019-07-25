@@ -28,6 +28,11 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
   temp_dir <- here(db_dir, org_id, seq_type, "temp") # Temporary
   profiles_dir <- paste(temp_dir, "/", "profiles.csv", sep = "")
   loci.list <- paste(temp_dir, "/", "loci.csv", sep = "") # Loci list
+  blast_out_file <- here("data", "output", "blastout.txt")
+  
+  if(!file.exists(blast_out_file)){
+    file.create(blast_out_file) # If it doesn't exist yet just create it.
+  }
   
   # ------------- Initialize Loci ----------------
   writeLines("Initialize Loci....")
@@ -96,9 +101,6 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
                                         stringsAsFactors = FALSE)
           return(sample_error.df)
         }
-        
-        blast_out_file <- "blastout.txt" # Use this as a temporary location, it'll get deleted later.
-        file.create(blast_out_file) # Create output file. Blast needs the file to exist first.
         
         blast_command <- paste("blastn -db ", locus_dna_lookup, "-query ", dest_file, " -out ", blast_out_file, " -num_alignments 10 -evalue 10e-175 -outfmt 6")
         try(system(blast_command))
@@ -210,10 +212,10 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
       if(is.null(copy_dim) || copy_dim[1] == 0 || copy_dim[2] == 0){
         ST <- NA # Set sequence typing to NA because?
         mlst_type.df <- data.frame(ST, stringsAsFactors = FALSE)
-        curr_output.df <- bind_cols(curr_output.df, mlst_type.df) # ADDED ####
+        curr_output.df <- bind_cols(curr_output.df, mlst_type.df)
       } else {
         curr_output.df <- bind_cols(curr_output.df,
-                                    select(profiles_copy.df, ST)) # ADDED ####
+                                    select(profiles_copy.df, ST))
         mlst_type.df <- select(profiles_copy.df, ST) # Get the correct ST
       }
       
