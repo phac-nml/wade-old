@@ -298,7 +298,7 @@ server <- function(input, output, session){
                                       inputId = "confirm_execution",
                                       title = "Confirm Execution?",
                                       text = "Once confirmed it cannot be stopped!",
-                                      type = "question",
+                                      type = "warning",
                                       btn_labels = c("Cancel", "Confirm"))
     }
   }) # End Main Call ####
