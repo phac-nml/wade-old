@@ -36,7 +36,15 @@ RUN R -e "source('https://bioconductor.org/biocLite.R'); biocLite('Rsamtools')"
 # 	the connector is being installed from the 'pavian' branch
 #
 # 	This will need to change to phac-nml/galaxy-connector
-RUN R -e "remotes::install_github('justinband/r-galaxy-connector', ref='pavian')"
+RUN R -e "remotes::install_github('justinband/r-galaxy-connector', ref='wade')"
+
+# Install dependencies before installing wade
+# 	Upside: Removes the install time of wade when any changes occur.
+# 	Downside: Must manage package installation from here..
+RUN R -e "install.packages(c('devtools', 'dplyr', 'here', 'purrr', 'shiny', 'shinydashboard', 'shinyFiles', 'shinyWidgets', 'stringr'))"
+
+COPY data/ /srv/shiny-server/data/
+RUN chmod -R 757 /srv/shiny-server/data # There must be an easier way..
 
 # Install wade from github
 # 	From 'galaxy' branch
@@ -44,7 +52,6 @@ RUN R -e "remotes::install_github('justinband/r-galaxy-connector', ref='pavian')
 RUN R -e "remotes::install_github('phac-nml/wade', ref='dev')"
 
 COPY shiny-server.conf  /etc/shiny-server/shiny-server.conf
-RUN rm -f /srv/shiny-server/*
 
 # Move pavians app.R file into /srv/shiny-server/ to be launched
 RUN R -e "sapply(list.files(system.file('shinyapp',package='wade'),full.names=TRUE),file.copy,to='/srv/shiny-server/',recursive=TRUE)"
