@@ -262,7 +262,6 @@ server <- function(input, output, session){
     
     locus <- getLocus()
     samples <- getSamples() # We need to make sure that sample isn't empty.
-    #print(samples)
     org <- input$org_tab_box
     test <- input[[paste(input$org_tab_box, "_test", sep = "")]] # Does this cause an issue?
     
