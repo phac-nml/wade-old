@@ -65,35 +65,33 @@ ui <- dashboardPage(skin = "blue",
                                   tabBox(id = "org_tab_box",
                                          tabPanel("GAS", # GAS Tab panel
                                                   prettyRadioButtons("GAS_test", h3("Choose an analysis:"),
-                                                                     choices = sort(c("AMR Profile" = "AMR",
-                                                                                      "Toxin Profile" = "TOXINS",
+                                                                     choices = sort(c(#"AMR Profile" = "AMR", # Relies on master_blastr.R
+                                                                                      #"Toxin Profile" = "TOXINS",  # Relies on master_blastr.R
                                                                                       "MLST Type" = "MLST",
-                                                                                      "Virulence Factors" = "VIRULENCE",
+                                                                                      #"Virulence Factors" = "VIRULENCE",  # Relies on master_blastr.R
                                                                                       "EMM Typing" = "EMM",
-                                                                                      "MasterBlastR*" = "MASTER",
                                                                                       "ARG-ANNOT/Resfinder/CARD" = "AMR_DB",
                                                                                       "VFDB (Virulence Factor Database)" = "VFDB"
                                                                                       #"LabWare Metrics" = "LW_METRICS"
                                                                                       
                                                                      ), decreasing = FALSE),
-                                                                     selected = "AMR",
+                                                                     selected = "AMR_DB",
                                                                      animation = "smooth"
                                                   ),
                                                   value = "GAS"
                                          ),
                                          tabPanel("GONO", # GONO Tab Panel
                                                   prettyRadioButtons("GONO_test", h3("Choose an analysis:"),
-                                                                     choices = sort(c("AMR Profile" = "AMR",
+                                                                     choices = sort(c(#"AMR Profile" = "AMR",  # Relies on master_blastr.R
                                                                                       "NG-STAR Type" = "NGSTAR",
                                                                                       "23S rRNA Alleles" = "rRNA23S",
-                                                                                      "LabWare AMR profile*" = "AMR_LW",
+                                                                                      #"LabWare AMR profile*" = "AMR_LW",  # Relies on LabwareUpload_GONO_AMR.R
                                                                                       "MLST Type" = "MLST",
-                                                                                      "NG-MAST Type" = "NGMAST",
-                                                                                      "MasterBlastR*" = "MASTER"
+                                                                                      "NG-MAST Type" = "NGMAST"
                                                                                       #"LabWare Metrics" = "LW_METRICS"
                                                                                       
                                                                      ), decreasing = FALSE),
-                                                                     selected = "AMR",
+                                                                     selected = "MLST",
                                                                      animation = "smooth"
                                                   ),
                                                   value = "GONO"
@@ -101,17 +99,16 @@ ui <- dashboardPage(skin = "blue",
                                          tabPanel("PNEUMO", # PNEUMO Tab Panel
                                                   prettyRadioButtons("PNEUMO_test",
                                                                      h3("Choose an analysis:"),
-                                                                     choices = sort(c("AMR Profile" = "AMR",
+                                                                     choices = sort(c(# "AMR Profile" = "AMR", # Relies on master_blastr.R
                                                                                       "23S rRNA Alleles" = "rRNA23S",
-                                                                                      "Serotyping*" = "SERO",
+                                                                                      #"Serotyping*" = "SERO",  # Relies on PneumoCaT.R
                                                                                       "MLST Type" = "MLST",
-                                                                                      "Virulence Factors" = "VIRULENCE",
-                                                                                      "MasterBlastR*" = "MASTER",
+                                                                                      #"Virulence Factors" = "VIRULENCE",  # Relies on master_blastr.R
                                                                                       "ARG-ANNOT/Resfinder/CARD" = "AMR_DB",
                                                                                       "VFDB (Virulence Factor Database)" = "VFDB"
                                                                                       #"LabWare Metrics" = "LW_METRICS"
                                                                      ), decreasing = FALSE),
-                                                                     selected = "SERO",
+                                                                     selected = "AMR_DB",
                                                                      animation = "smooth"
                                                   ),
                                                   value = "PNEUMO"
