@@ -103,11 +103,8 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
         }
         
         blast_command <- paste("blastn -db ", locus_dna_lookup, "-query ", dest_file, " -out ", blast_out_file, " -num_alignments 10 -evalue 10e-175 -outfmt 6")
-        try(system(blast_command))
+        blast_info <- file.info(blast(blast_command, blast_out_file))
         
-        blast_info <- file.info(blast_out_file) # get the results from the blast command
-        
-        print(blast_info)
         if(blast_info$size == 0){
           allele <- "No gene present"
           allele_num <- "0"
