@@ -42,7 +42,6 @@ emm <- function(org_id, samples.df, locus){
   
   loci_dna_lookup <- all_loci %>% pmap(~ paste(lookup_dir, "/", .x, ".fasta", sep = ""))
   
-  
   blastout.df <- query_files %>% map(function(x){ # Use the fastas on each loci and call emm_blastout
     new_blast <- data.frame()
     
@@ -52,9 +51,10 @@ emm <- function(org_id, samples.df, locus){
                   message = paste("Executing emm blast on ", basename(x), sep=""))
       
       # Perform and Read blast
-      outpath <- emm_blastout(x, loci_dna_lookup, blast_out_file) # How can we do this if there are multiple loci?
-      info <- file.info(outpath) # Pull the info even if there is none
       
+      blast_command <- paste("blastn -query ", x, " -db ", loci_dna_lookup, " -out ", blast_out_file, " -num_alignments 10 -evalue 10e-50 -outfmt 6")
+      info <- file.info(blast(blast_command, blast_out_file))
+  
       if(is.na(info$size)){ # There's nothing to be read!
         writeLines("Blast file not found!")
       } else { # There is file information so read it
@@ -63,9 +63,8 @@ emm <- function(org_id, samples.df, locus){
                               sep = "\t",
                               stringsAsFactors = FALSE)
         names(new_blast) <- blast_names
-        #new_blast
       }
-      file.remove(outpath) # Remove the file after using it
+      file.remove(blast_out_file) # Remove the file after using it
     }
     new_blast
   })
@@ -122,23 +121,6 @@ write_emm_output <- function(write_blast, blast.df, sample.df, org_id){
   write.csv(sample.df, emm_labware_file, quote = FALSE, row.names = FALSE) # Always write a LabwareOutput
   
   writeLines("DONE: EMM_pipeline()")
-}
-
-# ------------------------------------
-# emm_blastout()
-#
-# Perform a blastout command which produces a table
-#
-# RETURN: returns the path to the blast .csv output
-emm_blastout <- function(dest, database, output){
-  file.create(output) # Create the output first
-  
-  if(file.exists(output)){ # Save some time and run only if it creates successfully
-    blast_command <- paste("blastn -query ", dest, " -db ", database, " -out ", output, " -num_alignments 10 -evalue 10e-50 -outfmt 6")
-    try(system(blast_command)) # Run the blast command!
-  }
-  
-  output # Return the output path
 }
 
 # ------------------------------------
