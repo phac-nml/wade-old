@@ -9,10 +9,13 @@ server <- function(input, output, session){
   file_out <- NULL
   final_out.df <- data.frame()
   
-  names <- c("parent_dir", "subdir_id", "filename")
+  names <- c("fullpath", "subdir_id", "filename", "type")
   fullpath <- ""
-  downloaded_samples.df <- data.frame(matrix(ncol = 3, nrow = 0), stringsAsFactors = FALSE) # Initialize to an empty df
+  downloaded_samples.df <- data.frame(matrix(ncol = 5, nrow = 0), stringsAsFactors = FALSE) # Initialize to an empty df
   names(downloaded_samples.df) <- names # Give the df some col names
+  
+  displayed_samples.df <- data.frame(matrix(ncol = 5, nrow = 0), stringsAsFactors = FALSE)
+  names(displayed_samples.df) <- names # Apply our names to it!
   
   # ---- Grab the Galaxy info from the Environment ---- #
   api <- Sys.getenv("GX_API_KEY")
@@ -59,20 +62,30 @@ server <- function(input, output, session){
         # Using [1,'hid'] because this will happen for each single data piece.
         # With a collection it only needs the parent directory so grabbing the first hid will also work
         datapath <- GalaxyConnector::gx_get(data_hid.df[1, 'hid']) 
+        type <- data_hid.df[1,'type']
+        data_name <- data_hid.df[1, 'name']
         
         if(!is.null(datapath)){
           fullpath <- base::dirname(datapath) # Get everything up until the name of the data
           parent_dir <- base::dirname(fullpath) # Append dir_num so we can use list.files!
           dir_num <- base::basename(fullpath) # Get only the directory the data exists to use for tidy data
           
-          combine.df <- data.frame("parent_dir" = parent_dir, "subdir_id" = dir_num, "filename" = list.files(fullpath), stringsAsFactors = FALSE) %>% 
-            dplyr::filter(!(filename %in% unlist(downloaded_samples.df["filename"]))) # Filter out selected data (works with collections here)
+          # We're trying to have two separate lists. One has ALL the data downloaded. One has just what's displayed. That way the user
+          #   can select collections after they've added them (i.e. choose from displayed_samples.df)
           
-          if(dim(combine.df)[1] != 0){
-            downloaded_samples.df <<- rbind(downloaded_samples.df, combine.df) # We need to change it globally. Could also use a reactive?
+          # We don't need to filter here because we still want to add ALL the data
+         
+          all_downloaded.df <- data.frame("fullpath" = fullpath, "parent_dir" = parent_dir, "subdir_id" = dir_num, "filename" = list.files(fullpath), "type"="file", stringsAsFactors = FALSE)
+          
+          displayed_combine.df <- data.frame("fullpath"=fullpath, "parent_dir"=parent_dir, "subdir_id"=dir_num, "filename"=data_name, "type"=type, stringsAsFactors = FALSE) %>% 
+            dplyr::filter(!(filename %in% unlist(displayed_samples.df["filename"]))) # Filter it we've already added it
+          
+          if(dim(displayed_combine.df)[1] != 0){
+            downloaded_samples.df <<- rbind(downloaded_samples.df, all_downloaded.df) # We need to change it globally
+            displayed_samples.df <<- rbind(displayed_samples.df, displayed_combine.df) # Combine!
             
             # Use our downloaded data frame
-            samples <- downloaded_samples.df %>% pull(filename)
+            samples <- displayed_samples.df[['filename']]
             
             sendSweetAlert(session = session,
                            title = "Confirmed",
@@ -107,7 +120,7 @@ server <- function(input, output, session){
   })
   
   observeEvent(input$select_all, {
-    samples <- downloaded_samples.df %>% pull(filename)
+    samples <- displayed_samples.df$filename
     updatePrettyCheckboxGroup(session = session,
                               inputId = "samples_check",
                               selected = samples)
@@ -130,20 +143,34 @@ server <- function(input, output, session){
     locus
   })
   
-  downloadedDim <- reactive({
-    dimensions <- dim(downloaded_samples.df)
+  displayedDim <- reactive({
+    dimensions <- dim(displayed_samples.df)
     dimensions
   })
   
   getSamples <- reactive({ # getSamples() will return a data frame
-    samples <- "" # start as empty
+    files <- ""
     
-    if(!is.null(input$samples_check) && !purrr::is_empty(input$samples_check)){
-      if(downloadedDim()[1] > 0 && downloadedDim()[2] > 0){ # Is there actually data that we can use?
-        samples <- dplyr::filter(downloaded_samples.df, filename %in% input$samples_check)
+    # A bit more complexity is needed here. We need to be able to get the corresponding data from a collection.
+    #   For the collection we just need to access the filepath and use list.files() to get all the files there.
+    #   For regular data we just need to use the displayed_samples.df information
+    if(!is.null(input$samples_check) && !purrr::is_empty(input$samples_check)){ # Make sure samples have been checked
+      if(displayedDim()[1] > 0 && displayedDim()[2] > 0){ # Is there actually data that we can use?
+        filter_names <- dplyr::filter(displayed_samples.df, filename %in% input$samples_check)
+        files <- dplyr::filter(filter_names, type == "file") # Filter for the type 'file'
+        colls <- dplyr::filter(filter_names, type == "collection") # Filter for the type 'collection'
+        
+        files <- rbind(files,
+                       colls$fullpath %>% map_df(~ data.frame(fullpath = .x,
+                                                              parent_dir = base::dirname(.x),
+                                                              subdir_id = base::basename(.x),
+                                                              filename = list.files(.x),
+                                                              type = "file")
+                                                 )
+                       )
       }
     }
-    samples
+    files
   })
   
   output$selected_Org <- renderText({
