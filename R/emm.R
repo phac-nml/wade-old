@@ -54,8 +54,8 @@ emm <- function(org_id, samples.df, locus){
       
       blast_command <- paste("blastn -query ", x, " -db ", loci_dna_lookup, " -out ", blast_out_file, " -num_alignments 10 -evalue 10e-50 -outfmt 6")
       info <- file.info(blast(blast_command, blast_out_file))
-  
-      if(is.na(info$size)){ # There's nothing to be read!
+      
+      if(is.na(info$size) || info$size == 0){ # There's nothing to be read!
         writeLines("Blast file not found!")
       } else { # There is file information so read it
         new_blast <- read.csv(blast_out_file,
