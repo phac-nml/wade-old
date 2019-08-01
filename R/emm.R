@@ -24,6 +24,9 @@ emm <- function(org_id, samples.df, locus){
 
   #  ---------------- Initialize DF's ----------------
   blastout.df <- data.frame()
+  
+  output.df <- data.frame(matrix(ncol=5, nrow=0), stringsAsFactors = FALSE)
+  names(output.df) <- c("Sample", "Type", "Subtype_Rep", "Subtype", "bp_id")
 
   # same as both AMR, and 23SrRNA files
   loci.df <- read.csv(all_loci) # Changed from read_csv
@@ -42,10 +45,10 @@ emm <- function(org_id, samples.df, locus){
   
   loci_dna_lookup <- all_loci %>% pmap(~ paste(lookup_dir, "/", .x, ".fasta", sep = ""))
   
-  blastout.df <- query_files %>% map(function(x){ # Use the fastas on each loci and call emm_blastout
-    new_blast <- data.frame()
-    
+  counter <- 1
+  blastout.df <- query_files %>% map_df(function(x){ # Use the fastas on each loci and call emm_blastout
     if(file.exists(x)){
+      new_blast <- data.frame()
       # Need to check if the loci.fasta exists
       incProgress(amount = progress_frac,
                   message = paste("Executing emm blast on ", basename(x), sep=""))
@@ -62,42 +65,49 @@ emm <- function(org_id, samples.df, locus){
                               header = FALSE,
                               sep = "\t",
                               stringsAsFactors = FALSE)
+        
         names(new_blast) <- blast_names
+        new_blast <- cbind(new_blast, "filename"=all_samples[counter])
+        counter <<- counter + 1
       }
       file.remove(blast_out_file) # Remove the file after using it
+      new_blast
     }
-    new_blast
   })
   
-  # We map2_dfr here because we want some sort of order
-  # We DO NOT want to show the wrong sample with the wrong information so we do it this way
-  output.df <- map2_dfr(blastout.df, all_samples, function(x, y){
-    if(!is.null(x)){
-      sub_type <- tolower(x$Allele) # A list of alleles for y sample
-      type <- sub_type
-      bp <- (180 - x$Mismatches) # A list of mismatches for y sample
-      type_rep <- unlist(map2(bp, sub_type, ~ get_emm_type_rep(.x, .y))) #
+  # Check if there is atleast SOME data in blastout.df
+  #   If there is none then nothing happened! No data worked!
+  if(purrr::is_empty(blastout.df)){
+    return(data.frame("Error"="No data succeeded", stringsAsFactors = FALSE))
+  }
 
-      data.frame(Sample = y,
-                 Type = type,
-                 Subtype_Rep = type_rep,
-                 Subtype = sub_type,
-                 bp_id = bp,
-                 stringsAsFactors = FALSE)
-    }
-  })
+  # Go through each row, do something and add it to output.df
+  for(i in 1:nrow(blastout.df)){
+    sub_type <- tolower(blastout.df[i, "Allele"])
+    type <- sub_type
+    bp <- (180 - blastout.df[i, "Mismatches"])
+    type_rep <- get_emm_type_rep(bp, sub_type)
+    
+    temp.df <- data.frame("Sample" = blastout.df[i, "filename"],
+                          "Type" = type,
+                          "Subtype_Rep" = type_rep,
+                          "Subtype" = sub_type,
+                          "bp_id" = bp,
+                          stringsAsFactors = FALSE)
+    
+    output.df <- dplyr::bind_rows(output.df, temp.df)
+  }
   
-  output.df <- filter(output.df, Type != error) # Filter out the rows that contain errors
   # A row will have an error when there is a sample that does not exist
-  
+  output.df <- filter(output.df, Type != error) # Filter out the rows that contain errors
+
   if(num_samples == 1){
     write_emm_output(write_blast = TRUE, blastout.df, output.df, org_id)
-    return(blastout.df[[1]])
+    return(blastout.df)
   } else {
     write_emm_output(write_blast = FALSE, blastout.df, output.df, org_id)
     return(output.df)
   }
-  
 } # end function call
 
 # ------------------------------------
@@ -113,7 +123,7 @@ write_emm_output <- function(write_blast, blast.df, sample.df, org_id){
   emm_labware_file <- here("data", "output", paste(datetime, "_LabWareUpload_GAS_emm.csv", sep=""))
   
   if(write_blast){ # We only write the blast when there is one file
-    write.csv(blast.df[[1]], emm_blast_file, row.names = FALSE)
+    write.csv(blast.df, emm_blast_file, row.names = FALSE)
   } else { # Otherwise just write E V E R Y T H I N G
     write.csv(sample.df, emm_file, row.names = FALSE)
   }
