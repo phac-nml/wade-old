@@ -3,7 +3,7 @@ library(shiny)
 library(shinyWidgets)
 library(shinyFiles)
 
-#' Function building dashboard UI, used in Shiny app
+#' WADE UI Function
 #' 
 #' @export
 ui <- dashboardPage(skin = "blue",
@@ -35,12 +35,12 @@ ui <- dashboardPage(skin = "blue",
                                   menuItem(text = "Output",
                                            tabName = "output",
                                            icon = icon("file")
-                                  ),
-                                  # Settings Tab ####
-                                  menuItem(text = "Settings",
-                                           tabName = "settings",
-                                           icon = icon("cog")
                                   )
+                                  # Settings Tab ####
+                                  # menuItem(text = "Settings",
+                                  #          tabName = "settings",
+                                  #          icon = icon("cog")
+                                  # )
                       ),
                       # execute Button ####
                       actionBttn(inputId = "execute",
@@ -125,7 +125,8 @@ ui <- dashboardPage(skin = "blue",
                                                   prettyRadioButtons(inputId = "locus",
                                                                      label = h3("Select a locus to query"),
                                                                      choices = list("Default loci list" = "list",
-                                                                                    "Input locus query" = "input_loci"),
+                                                                                    "Input locus query" = "input_loci",
+                                                                                    "Upload Loci" = "loci_upload_radio"),
                                                                      selected = "list",
                                                                      animation = "smooth"
                                                                      
@@ -135,20 +136,24 @@ ui <- dashboardPage(skin = "blue",
                                                     textInput(inputId = "user_locus", label = "Enter a locus to query", value = "")
                                                     # Should this maybe be textAreaInput? That way they can expand it if they wish?
                                                   ),
-                                                  shinyFiles::shinyDirButton(id = "loci_upload",
-                                                                             label = "Upload Loci",
-                                                                             title = "Select a File/Folder to upload"
-                                                                             )
+                                                  conditionalPanel(
+                                                    condition = "input.locus == 'loci_upload_radio'",
+                                                    shinyFiles::shinyDirButton(id = "loci_upload",
+                                                                               label = "UPLOAD",
+                                                                               title = "Select a File/Folder to upload"
+                                                    )
+                                                  )
+                                                  
                                          )
                                   )
                                 ), # End fluidRow
                                 
                                 fluidRow(
-                                  box(id = "selected_output",
-                                      textOutput("selected_Org"),
-                                      textOutput("selected_test"),
-                                      textOutput("entered_locus")
-                                  ),
+                                  # box(id = "selected_output",
+                                  #     textOutput("selected_Org"),
+                                  #     textOutput("selected_test"),
+                                  #     textOutput("entered_locus")
+                                  # ),
                                   box(id = "samples",
                                       title = h2("Samples"),
                                       actionButton(inputId = "select_all",
@@ -166,27 +171,27 @@ ui <- dashboardPage(skin = "blue",
                                 uiOutput("output_title"),
                                 uiOutput("download"),
                                 uiOutput("filter")
-                        ),
+                        )
                         
                         # Settings tab content
-                        tabItem(tabName = "settings",
-                                h2("Settings"),
-                                h3("Database Versions:"),
-                                actionBttn(inputId = "update-db",
-                                           label = "Update Databases",
-                                           icon = shiny::icon("exchange-alt"),
-                                           color = "primary",
-                                           style = "material-flat",
-                                           block = "FALSE"
-                                ),
-                                actionBttn(inputId = "make_blast_db",
-                                           label = "Make BlastDB",
-                                           icon = shiny::icon("database"),
-                                           color = "primary",
-                                           style = "material-flat",
-                                           block = "FALSE"
-                                )
-                        )
+                        # tabItem(tabName = "settings",
+                        #         h2("Settings"),
+                        #         h3("Database Versions:"),
+                        #         actionBttn(inputId = "update-db",
+                        #                    label = "Update Databases",
+                        #                    icon = shiny::icon("exchange-alt"),
+                        #                    color = "primary",
+                        #                    style = "material-flat",
+                        #                    block = "FALSE"
+                        #         ),
+                        #         actionBttn(inputId = "make_blast_db",
+                        #                    label = "Make BlastDB",
+                        #                    icon = shiny::icon("database"),
+                        #                    color = "primary",
+                        #                    style = "material-flat",
+                        #                    block = "FALSE"
+                        #         )
+                        # )
                       )
                     )
 )
