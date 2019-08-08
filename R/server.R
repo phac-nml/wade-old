@@ -1,4 +1,4 @@
-#' Manta Server Function
+#' WADE Server Function
 #'
 #' @param input Input object
 #' @param output Output object
@@ -78,7 +78,7 @@ server <- function(input, output, session){
           all_downloaded.df <- data.frame("fullpath" = fullpath, "parent_dir" = parent_dir, "subdir_id" = dir_num, "filename" = list.files(fullpath), "type"="file", stringsAsFactors = FALSE)
           
           displayed_combine.df <- data.frame("fullpath"=fullpath, "parent_dir"=parent_dir, "subdir_id"=dir_num, "filename"=data_name, "type"=type, stringsAsFactors = FALSE) %>% 
-            dplyr::filter(!(filename %in% unlist(displayed_samples.df["filename"]))) # Filter it we've already added it
+            dplyr::filter(!(filename %in% unlist(displayed_samples.df["filename"]))) # Filter if we've already added it
           
           if(dim(displayed_combine.df)[1] != 0){
             downloaded_samples.df <<- rbind(downloaded_samples.df, all_downloaded.df) # We need to change it globally
@@ -95,7 +95,7 @@ server <- function(input, output, session){
             output$sample_selection <- renderUI({
               prettyCheckboxGroup(inputId = "samples_check",
                                   label = "",
-                                  inline = TRUE,
+                                  inline = FALSE,
                                   status = "info",
                                   choices = samples,
                                   selected = samples)
@@ -119,15 +119,17 @@ server <- function(input, output, session){
     
   })
   
+  # Select all samples
   observeEvent(input$select_all, {
-    samples <- displayed_samples.df$filename
+    samples <- displayed_samples.df$filename # Update the checkbox with all the files!
     updatePrettyCheckboxGroup(session = session,
                               inputId = "samples_check",
                               selected = samples)
   })
   
+  # Deselect all samples
   observeEvent(input$deselect_all, {
-    samples <- "NA"
+    samples <- "NA" # Update the checkbox with nothing!
     updatePrettyCheckboxGroup(session = session,
                               inputId = "samples_check",
                               selected = samples)
@@ -145,13 +147,12 @@ server <- function(input, output, session){
   
   displayedDim <- reactive({
     dimensions <- dim(displayed_samples.df)
-    dimensions
   })
   
   getSamples <- reactive({ # getSamples() will return a data frame
     files <- ""
     
-    # A bit more complexity is needed here. We need to be able to get the corresponding data from a collection.
+    # The added complexity is needed here. We need to be able to get the corresponding data from a collection.
     #   For the collection we just need to access the filepath and use list.files() to get all the files there.
     #   For regular data we just need to use the displayed_samples.df information
     if(!is.null(input$samples_check) && !purrr::is_empty(input$samples_check)){ # Make sure samples have been checked
@@ -186,15 +187,12 @@ server <- function(input, output, session){
     paste("Locus: ", getLocus())
   })
   
+  # Upload Loci Button
   shinyFiles::shinyDirChoose(input,
                              id = "loci_upload",
-                             root=c(root="."),
+                             root=shinyFiles::getVolumes()(),
                              filetypes=c('')
                              )
-  
-  observeEvent(input$loci_upload, {
-    print(input$loci_upload)
-  })
   
   # Output Tab ####
   output$download_data <- downloadHandler(
@@ -245,6 +243,23 @@ server <- function(input, output, session){
                                    pageLength = 10))
   }
   
+  # Output Filter ####
+  observeEvent(input$filter, {
+    vals <- input$filter # This is a list
+    headers <- colnames(x = final_out.df) # Headers of the data table
+    filters <- unlist(vals) %>% map(~ grep(.x, headers)) %>% unlist() # Get the columns that contain the vals from the filter
+    
+    if(!is.null(vals)){ # Are there filters selected??
+      output$profile_table <- renderDataTable(select(final_out.df, filters), # Do a select on the table
+                                              options = list(scrollX = TRUE, # This render can probably be made into a small module
+                                                             pageLength = 10))
+    } else { # No filters, just do regular
+      output$profile_table <- renderDataTable(final_out.df,
+                                              options = list(scrollX = TRUE,
+                                                             pageLength = 10))
+    }
+  }, ignoreNULL = FALSE) # Needed to detect any deselection to NULL
+  
   #---------------
   # createFilters
   #
@@ -273,6 +288,25 @@ server <- function(input, output, session){
       )
     })
   }
+  
+  # Execute ####
+  observeEvent(input$execute, {
+    # If there is no data selected
+    if(getSamples() == "" || is.null(getSamples()[1,1]) || getSamples()[1,1] == ""){
+      shinyWidgets::sendSweetAlert(session = session,
+                                   title = "No Data Selected",
+                                   text = "Please select some data and try again",
+                                   type = "warning",
+                                   btn_labels = "Ok")
+    } else {
+      shinyWidgets::confirmSweetAlert(session = session,
+                                      inputId = "confirm_execution",
+                                      title = "Confirm Execution?",
+                                      text = "Once confirmed it cannot be stopped!",
+                                      type = "warning",
+                                      btn_labels = c("Cancel", "Confirm"))
+    }
+  })
   
   #-------------
   # execute
@@ -305,46 +339,11 @@ server <- function(input, output, session){
               file = file_out,
               row.names = FALSE)
     
-    GalaxyConnector::gx_put(file_out, filename) # Writes the file to Galaxy
+    #GalaxyConnector::gx_put(file_out, filename) # Writes the file to Galaxy
     
     createDownloadButton()
     createFilters(output.df)
   }
-  
-  observeEvent(input$execute, {
-    # If there is no data selected
-    if(getSamples() == "" || is.null(getSamples()[1,1]) || getSamples()[1,1] == ""){
-      shinyWidgets::sendSweetAlert(session = session,
-                                   title = "No Data Selected",
-                                   text = "Please select some data and try again",
-                                   type = "warning",
-                                   btn_labels = "Ok")
-    } else {
-      shinyWidgets::confirmSweetAlert(session = session,
-                                      inputId = "confirm_execution",
-                                      title = "Confirm Execution?",
-                                      text = "Once confirmed it cannot be stopped!",
-                                      type = "warning",
-                                      btn_labels = c("Cancel", "Confirm"))
-    }
-  }) # End Main Call ####
-  
-  # Output Filter ####
-  observeEvent(input$filter, {
-    vals <- input$filter # This is a list
-    headers <- colnames(x = final_out.df) # Headers of the data table
-    filters <- unlist(vals) %>% map(~ grep(.x, headers)) %>% unlist() # Get the columns that contain the vals from the filter
-    
-    if(!is.null(vals)){ # Are there filters selected??
-      output$profile_table <- renderDataTable(select(final_out.df, filters), # Do a select on the table
-                                              options = list(scrollX = TRUE, # This render can probably be made into a small module
-                                                             pageLength = 10))
-    } else { # No filters, just do regular
-      output$profile_table <- renderDataTable(final_out.df,
-                                              options = list(scrollX = TRUE,
-                                                             pageLength = 10))
-    }
-  }, ignoreNULL = FALSE) # Needed to detect any deselection to NULL
   
   # Called from Main server call
   # Calls the correct analysis
@@ -373,5 +372,5 @@ server <- function(input, output, session){
   }
 
   # Settings Tab ####
-  observeEvent(input$make_blast_db, { Index_pipeline(org, test, locus) })
+  #observeEvent(input$make_blast_db, { Index_pipeline(org, test, locus) })
 }
