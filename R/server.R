@@ -194,6 +194,16 @@ server <- function(input, output, session){
                              filetypes=c('')
                              )
   
+  observeEvent(input$loci_upload, {
+    print(parseDirPath(getVolumes()(), input$loci_upload))
+  })
+  
+  # Upload File Button
+  observeEvent(input$loci_file_upload, {
+    unzip(zipfile = input$loci_file_upload$datapath,
+          exdir = here()) # Use exdir to specify the directory to extract files to. Will be created if needed.
+  })
+  
   # Output Tab ####
   output$download_data <- downloadHandler(
     filename = function() { paste("test-", Sys.Date(), ".", input$download_type, sep = "") },
@@ -339,7 +349,7 @@ server <- function(input, output, session){
               file = file_out,
               row.names = FALSE)
     
-    #GalaxyConnector::gx_put(file_out, filename) # Writes the file to Galaxy
+    GalaxyConnector::gx_put(file_out, filename) # Writes the file to Galaxy
     
     createDownloadButton()
     createFilters(output.df)
