@@ -30,5 +30,7 @@ if (!dir.exists(rappdirs::user_config_dir("wade", expand = FALSE))) {
              recursive = TRUE)
 }
 
+options(shiny.maxRequestSize = 500*1024^2)
+
 # Shiny app call
 shiny::shinyApp(wade::ui, wade::server, enableBookmarking="server")
