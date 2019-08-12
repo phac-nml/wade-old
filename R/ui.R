@@ -138,12 +138,9 @@ ui <- dashboardPage(skin = "blue",
                                                   ),
                                                   conditionalPanel(
                                                     condition = "input.locus == 'loci_upload_radio'",
-                                                    shinyFiles::shinyDirButton(id = "loci_upload",
-                                                                               label = "UPLOAD",
-                                                                               title = "Select a File/Folder to upload"
-                                                    ),
+                                                    textOutput(outputId = "here_location"),
                                                     fileInput(inputId = 'loci_file_upload',
-                                                              label = 'Choose file to upload',
+                                                              label = 'Choose .zip file to upload',
                                                               accept = ".zip",
                                                               multiple = FALSE) # Only take one input .zip file
                                                   )
