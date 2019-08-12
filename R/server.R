@@ -198,6 +198,8 @@ server <- function(input, output, session){
     print(parseDirPath(getVolumes()(), input$loci_upload))
   })
   
+  output$here_location <- renderText({paste(here())})
+  
   # Upload File Button
   observeEvent(input$loci_file_upload, {
     unzip(zipfile = input$loci_file_upload$datapath,
