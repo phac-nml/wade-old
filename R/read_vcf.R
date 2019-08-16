@@ -1,4 +1,3 @@
-#' read_vcf.R
 #' Reads a .vcf file ignoring any headers, creates a data frame from the remaining lines
 #'
 #' 1. Grabs the header from the correct line
@@ -36,7 +35,6 @@ read_vcf <- function(path){
     in_file.df
 
   } else {
-    warn(message = paste("read_vcf.R: ", path, " is not a valid file path..."))
     data.frame() # Return an empty data frame
   }
 }
