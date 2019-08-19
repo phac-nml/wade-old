@@ -65,7 +65,7 @@ ui <- dashboardPage(skin = "blue",
                                   tabBox(id = "org_tab_box",
                                          tabPanel("GAS", # GAS Tab panel
                                                   prettyRadioButtons("GAS_test", h3("Choose an analysis:"),
-                                                                     choices = sort(c("AMR Profile" = "AMR", # Relies on master_blastr.R
+                                                                     choices = sort(c(#"AMR Profile" = "AMR", # Relies on master_blastr.R
                                                                                       "Toxin Profile" = "TOXINS",  # Relies on master_blastr.R
                                                                                       "MLST Type" = "MLST",
                                                                                       "Virulence Factors" = "VIRULENCE",  # Relies on master_blastr.R
@@ -82,7 +82,7 @@ ui <- dashboardPage(skin = "blue",
                                          ),
                                          tabPanel("GONO", # GONO Tab Panel
                                                   prettyRadioButtons("GONO_test", h3("Choose an analysis:"),
-                                                                     choices = sort(c("AMR Profile" = "AMR",  # Relies on master_blastr.R
+                                                                     choices = sort(c(#"AMR Profile" = "AMR",  # Relies on master_blastr.R
                                                                                       "NG-STAR Type" = "NGSTAR",
                                                                                       "23S rRNA Alleles" = "rRNA23S",
                                                                                       #"LabWare AMR profile*" = "AMR_LW",  # Relies on LabwareUpload_GONO_AMR.R
@@ -99,7 +99,7 @@ ui <- dashboardPage(skin = "blue",
                                          tabPanel("PNEUMO", # PNEUMO Tab Panel
                                                   prettyRadioButtons("PNEUMO_test",
                                                                      h3("Choose an analysis:"),
-                                                                     choices = sort(c("AMR Profile" = "AMR", # Relies on master_blastr.R
+                                                                     choices = sort(c(#"AMR Profile" = "AMR", # Relies on master_blastr.R
                                                                                       "23S rRNA Alleles" = "rRNA23S",
                                                                                       #"Serotyping*" = "SERO",  # Relies on PneumoCaT.R
                                                                                       "MLST Type" = "MLST",
