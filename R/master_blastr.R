@@ -140,9 +140,15 @@ master_blastr <- function(org_id, test_id, sample_num, locus_id){
   for (m in 1L:num_samples){ # Loop through the samples
 
     # Variables ####
-    curr_sample_num <- as.character(samples.df[m, "SampleNo"])
+    writeLines("----------------")
+    print(samples.df)
+    writeLines("----------------")
+    
+    
+    curr_sample_num <- as.character(samples.df[m, "SampleNo.filename"])
+    print(curr_sample_num)
     curr_sample_var <-as.character(samples.df[m, "Variable"])
-    curr_sample.df <- filter(samples.df, SampleNo == curr_sample_num)
+    curr_sample.df <- filter(samples.df, SampleNo.filename == curr_sample_num)
 
     sample_profile <- ""
 
