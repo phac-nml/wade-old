@@ -13,7 +13,7 @@ library(stringr)
 if(!require(wade)){
   options(repos = c(CRAN = "http://cran.rstudio.com"))
   if (!require(remotes)) { install.packages("remotes") }
-  remotes::install_github("phac-nml/wade", ref="dev")
+  remotes::install_github("phac-nml/wade", ref="master")
   library(wade)
 }
 

@@ -47,7 +47,7 @@ RUN chmod -R 757 /srv/shiny-server/data # There must be an easier way..
 # Install wade from github
 # 	From 'galaxy' branch
 # 	Use ref= to specify the branch to download. Removing ref= defaults to master
-RUN R -e "remotes::install_github('phac-nml/wade', ref='dev')"
+RUN R -e "remotes::install_github('phac-nml/wade', ref='master')"
 
 COPY shiny-server.conf  /etc/shiny-server/shiny-server.conf
 
