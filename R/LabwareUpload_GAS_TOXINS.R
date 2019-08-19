@@ -26,7 +26,7 @@ labware_gas_toxins <- function() {
   # Initialize DF's ####
   # Initialize Return Var ####
   labware.df <- data.frame(
-    SampleNo = output.df$SampleNo,
+    SampleNo = output.df$SampleNo.filename,
     select(output.df, contains("result")),
     SampleProfile = output.df$SampleProfile
   )
