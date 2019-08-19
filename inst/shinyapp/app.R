@@ -21,7 +21,7 @@ if(!require(wade)){
 if(!require(GalaxyConnector)){
   options(repos = c(CRAN = "http://cran.rstudio.com")) 
   if(!require(remotes)){ install.packages("remotes") }
-  remotes::install_github("justinband/r-galaxy-connector", ref="pavian") # This needs to change to phac-nml/galaxy-connector
+  remotes::install_github("phac-nml/r-galaxy-connector", ref="master") # This needs to change to phac-nml/galaxy-connector
   library(GalaxyConnector)
 }
 
