@@ -32,16 +32,14 @@ RUN R -e "options(repos = c(CRAN = 'http://cran.rstudio.com')); install.packages
 RUN R -e "source('https://bioconductor.org/biocLite.R'); biocLite('Rsamtools')"
 
 # Install GalaxyConnector from github
-# 	Made some modifications to r-galaxy-connector specifically for Pavian hence
-# 	the connector is being installed from the 'pavian' branch
-#
 # 	This will need to change to phac-nml/galaxy-connector
-RUN R -e "remotes::install_github('justinband/r-galaxy-connector', ref='wade')"
+RUN R -e "remotes::install_github('phac-nml/r-galaxy-connector', ref='master')"
 
 # Install dependencies before installing wade
 # 	Upside: Removes the install time of wade when any changes occur.
 # 	Downside: Must manage package installation from here..
 RUN R -e "install.packages(c('devtools', 'dplyr', 'here', 'purrr', 'shiny', 'shinydashboard', 'shinyFiles', 'shinyWidgets', 'stringr'))"
+RUN R -e "install.packages('rappdirs')"
 
 COPY data/ /srv/shiny-server/data/
 RUN chmod -R 757 /srv/shiny-server/data # There must be an easier way..
@@ -53,15 +51,18 @@ RUN R -e "remotes::install_github('phac-nml/wade', ref='dev')"
 
 COPY shiny-server.conf  /etc/shiny-server/shiny-server.conf
 
-# Move pavians app.R file into /srv/shiny-server/ to be launched
+# Move WADE app.R file into /srv/shiny-server/ to be launched
 RUN R -e "sapply(list.files(system.file('shinyapp',package='wade'),full.names=TRUE),file.copy,to='/srv/shiny-server/',recursive=TRUE)"
 
-RUN R -e "install.packages('rappdirs')"
-
 # Copy some files over
+# 	shiny-server specifies launch instructions
+# 		copy environment variables and such
+#
+# 	monitor_traffic kills the container after it hasn't been used in a while
 COPY shiny-server.sh /usr/bin/shiny-server.sh
 COPY monitor_traffic.sh /monitor_traffic.sh
 
+# Open port 80
 EXPOSE 80
 
 # Run it!
