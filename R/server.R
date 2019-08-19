@@ -199,9 +199,12 @@ server <- function(input, output, session){
   })
   
   output$here_location <- renderText({paste(here())})
+  output$zip_upload_datapath <- renderText({"TEST"})
+  
   
   # Upload File Button
   observeEvent(input$loci_file_upload, {
+    output$zip_upload_datapath <- renderText({paste(input$loci_file_upload$datapath)})
     unzip(zipfile = input$loci_file_upload$datapath,
           exdir = here()) # Use exdir to specify the directory to extract files to. Will be created if needed.
   })
@@ -219,16 +222,14 @@ server <- function(input, output, session){
     }
   )
   
-  #------------------
-  # CONFIRMATION CHECK
+  # CONFIRMATION CHECK ####
   observeEvent(input$confirm_execution, {
     if(isTRUE(input$confirm_execution)){
       execute()
     }
   })
   
-  #---------------------
-  # createDownloadButton
+  # createDownloadButton ####
   #
   # Creates a download button
   createDownloadButton <- function(){
@@ -245,8 +246,7 @@ server <- function(input, output, session){
     })
   }
   
-  #------------------
-  # createOutputTable
+  # createOutputTable ####
   #
   # Renders a data a given data table
   createOutputTable <- function(output.df){
@@ -272,8 +272,7 @@ server <- function(input, output, session){
     }
   }, ignoreNULL = FALSE) # Needed to detect any deselection to NULL
   
-  #---------------
-  # createFilters
+  # createFilters ####
   #
   # render a UI object containing the filters
   # of a given data frame
@@ -301,7 +300,7 @@ server <- function(input, output, session){
     })
   }
   
-  # Execute ####
+  # Observe Event Execute ####
   observeEvent(input$execute, {
     # If there is no data selected
     if(getSamples() == "" || is.null(getSamples()[1,1]) || getSamples()[1,1] == ""){
@@ -320,8 +319,7 @@ server <- function(input, output, session){
     }
   })
   
-  #-------------
-  # execute
+  # execute ####
   #
   # The "main" call.
   # switches the session to the output tab to display output.
@@ -357,6 +355,7 @@ server <- function(input, output, session){
     createFilters(output.df)
   }
   
+  # EXECUTE ANALYSIS ####
   # Called from Main server call
   # Calls the correct analysis
   #
