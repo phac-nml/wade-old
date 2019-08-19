@@ -1,6 +1,5 @@
 library(devtools)
 library(dplyr)
-library(GalaxyConnector)
 library(jsonlite)
 library(here)
 library(purrr)
@@ -15,7 +14,7 @@ if(!require(wade)){
   options(repos = c(CRAN = "http://cran.rstudio.com"))
   if (!require(remotes)) { install.packages("remotes") }
   remotes::install_github("phac-nml/wade")
-  library(pavian)
+  library(wade)
 }
 
 if(!require(GalaxyConnector)){
