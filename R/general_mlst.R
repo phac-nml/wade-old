@@ -1,6 +1,3 @@
-
-#' general_mlst_pipeline
-#'
 #' Create a profile for MLST, NGMAST, or NGSTAR using blastn
 #'
 #' @param org_id Organism to query: GAS, PNEUMO or GONO
@@ -14,11 +11,6 @@
 #' @export
 
 general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
-  # TODO ####
-  # - Add file paths for all input data
-  # - If mutation info is not used for MLST or NGMAST then we don't need a case to create it or not
-  #
-  # - if(allele_num != "SampleErr") will keep looping! Why not just stop???
 
   # ------------- Directories ----------------
   db_dir <- paste("data/databases")

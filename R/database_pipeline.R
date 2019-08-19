@@ -1,4 +1,3 @@
-#' database_pipeline.R
 #' Generic Profiler : SampleNo_contigs.fasta vs. arg-annot/resfinder2/CARD or VFDB
 #'
 #' @param org_id Organism to query: GAS or GONO
