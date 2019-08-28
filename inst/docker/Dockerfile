@@ -1,4 +1,4 @@
-FROM r-base:latest
+FROM r-base:3.5.2
 
 MAINTAINER Adrian Zetner "adrian.zetner@canada.ca"
 
@@ -33,7 +33,7 @@ RUN R -e "source('https://bioconductor.org/biocLite.R'); biocLite('Rsamtools')"
 
 # Install GalaxyConnector from github
 # 	This will need to change to phac-nml/galaxy-connector
-RUN R -e "remotes::install_github('phac-nml/r-galaxy-connector', ref='master')"
+RUN R -e "remotes::install_github('phac-nml/r-galaxy-connector@*release')"
 
 # Install dependencies before installing wade
 # 	Upside: Removes the install time of wade when any changes occur.
