@@ -42,7 +42,9 @@ RUN R -e "remotes::install_github('phac-nml/r-galaxy-connector@*release')"
 RUN R -e "install.packages(c('devtools', 'dplyr', 'here', 'purrr', 'shiny', 'shinydashboard', 'shinyFiles', 'shinyWidgets', 'stringr'))"
 RUN R -e "install.packages('rappdirs')"
 
-COPY data/ /srv/shiny-server/data/
+RUN tag=$(curl --silent "https://api.github.com/repos/phac-nml/wade-data/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'); curl -L "https://github.com/phac-nml/wade-data/archive/$tag.zip" --output $tag.zip; unzip $tag.zip; mv wade-data* /srv/shiny-server/data/
+
+#COPY data/ /srv/shiny-server/data/
 RUN chmod -R 757 /srv/shiny-server/data # There must be an easier way..
 
 # Install wade from github
