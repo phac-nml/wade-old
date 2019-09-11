@@ -16,8 +16,10 @@ RUN apt-get update && apt-get install -y \
 	libxml2-dev \
     libssl-dev \
 	xtail \
+    nginx \
     wget \
     curl
+
 
 # Download and install shiny server
 RUN wget --no-verbose https://download3.rstudio.org/ubuntu-14.04/x86_64/VERSION -O "version.txt" && \
@@ -62,11 +64,12 @@ RUN R -e "sapply(list.files(system.file('shinyapp',package='wade'),full.names=TR
 # 		copy environment variables and such
 #
 # 	monitor_traffic kills the container after it hasn't been used in a while
-COPY shiny-server.sh /usr/bin/shiny-server.sh
+ADD shiny-server.sh /usr/bin/shiny-server.sh
 COPY monitor_traffic.sh /monitor_traffic.sh
+ADD nginx-default /etc/nginx/sites-available/default
 
 # Open port 80
-EXPOSE 80
+EXPOSE 80 3838
 
 # Run it!
 CMD ["/usr/bin/shiny-server.sh"]
