@@ -17,7 +17,9 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
 	xtail \
     nginx \
-    wget
+    wget \
+    curl
+
 
 # Download and install shiny server
 RUN wget --no-verbose https://download3.rstudio.org/ubuntu-14.04/x86_64/VERSION -O "version.txt" && \
@@ -34,7 +36,7 @@ RUN R -e "source('https://bioconductor.org/biocLite.R'); biocLite('Rsamtools')"
 
 # Install GalaxyConnector from github
 # 	This will need to change to phac-nml/galaxy-connector
-RUN R -e "remotes::install_github('phac-nml/r-galaxy-connector', ref='master')"
+RUN R -e "remotes::install_github('phac-nml/r-galaxy-connector@*release')"
 
 # Install dependencies before installing wade
 # 	Upside: Removes the install time of wade when any changes occur.
@@ -42,7 +44,9 @@ RUN R -e "remotes::install_github('phac-nml/r-galaxy-connector', ref='master')"
 RUN R -e "install.packages(c('devtools', 'dplyr', 'here', 'purrr', 'shiny', 'shinydashboard', 'shinyFiles', 'shinyWidgets', 'stringr'))"
 RUN R -e "install.packages('rappdirs')"
 
-COPY data/ /srv/shiny-server/data/
+RUN tag=$(curl --silent "https://api.github.com/repos/phac-nml/wade-data/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/'); curl -L "https://github.com/phac-nml/wade-data/archive/$tag.zip" --output $tag.zip; unzip $tag.zip; mv wade-data* /srv/shiny-server/data/
+
+#COPY data/ /srv/shiny-server/data/
 RUN chmod -R 757 /srv/shiny-server/data # There must be an easier way..
 
 # Install wade from github
