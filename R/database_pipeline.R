@@ -51,8 +51,8 @@ database_pipeline <- function(org_id, samples.df, is_vfdb){
 execute_blastout <- function(curr_db, sample, inc_amount){
   sample_num <- basename(sample) # Vector of sample names .fasta
   
-  incProgress(amount = inc_amount,
-              message = paste("Blasting ", sample_num, " against ", curr_db, sep = ""))
+  #incProgress(amount = inc_amount,
+  #            message = paste("Blasting ", sample_num, " against ", curr_db, sep = ""))
   
   writeLines(paste("Executing blastn for:", sample_num, "on db", curr_db))
   headers <- c("SampleNo", "DataBase", "GeneID", "MatchID")
