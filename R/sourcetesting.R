@@ -4,12 +4,13 @@
 # Run this in terminal
 # for o in GAS GONO PNEUMO; do echo Rscript R/wade_cmd.R -o $o -t TEST -s ~/testswade/SC10-1841-A.fasta; don
 
+
 # Scripts added as initial testing done (run with wade_cmd.R )
 source(normalizePath('R/database_pipeline.R'))
 source(normalizePath('R/emm.R'))
 source(normalizePath('R/general_mlst.R'))
 source(normalizePath('R/rRNA.R'))
-source(normalizePath('R/PneumoCaT.R'))
+# source(normalizePath('R/PneumoCaT.R')) # Doesn't accept a list of 
 
 
 # 23S RNA test needs read_vcf from this file

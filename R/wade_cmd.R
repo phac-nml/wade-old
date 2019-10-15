@@ -49,7 +49,7 @@ option_list = list(
               type='character',
               default=NULL,
               metavar='character',
-              callback=check_choose_from(choices = c('TOXINS','MLST','VIRULENCE','EMM','AMR_DB','VFDB','NGSTAR','rRNA23S','NGMAST')),
+              callback=check_choose_from(choices = c('MLST','VIRULENCE','EMM','AMR_DB','VFDB','NGSTAR','rRNA23S','NGMAST')), # c('TOXINS','MLST','VIRULENCE','EMM','AMR_DB','VFDB','NGSTAR','rRNA23S','NGMAST')),
               help='test'),
   make_option(c('-l', '--locus'),
               type='character',
@@ -95,9 +95,9 @@ switch(test,
        NGSTAR = { general_mlst_pipeline(org, samples, locus, test) },
        NGMAST = { general_mlst_pipeline(org, samples, locus, test) },
        rRNA23S = { rna_23s(org, samples) }, # Need proper testing data
+       VFDB = { database_pipeline(org, samples, TRUE) },
        # Tested to here
-       SERO = { PneumoCaT_pipeline(samples) },
-       # VFDB = { database_pipeline(org, samples, TRUE) },
+       # SERO = { PneumoCaT_pipeline(samples) }, # Needs Samplenum issue (not sample list) addressed
        # MASTER = { master_blastr(org, test, samples, locus) },
        # AMR_LW = { labware_gono_amr() }, # Not to include for first run through
        { master_blastr(org, test, samples, locus) }
