@@ -37,7 +37,7 @@ check_choose_from <- function(choices) {
 }
 
 option_list = list(
-  make_option(c('--organism'),
+  make_option(c('-o', '--organism'),
               action='callback',
               type='character',
               default=NULL,
@@ -48,7 +48,7 @@ option_list = list(
               action='callback',
               type='character',
               default=NULL,
-              metavar='characater',
+              metavar='character',
               callback=check_choose_from(choices = c('TOXINS','MLST','VIRULENCE','EMM','AMR_DB','VFDB','NGSTAR','rRNA23S','NGMAST')),
               help='test'),
   make_option(c('-l', '--locus'),
