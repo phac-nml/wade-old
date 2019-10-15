@@ -18,7 +18,7 @@
 #' @return A table frame containing the results of the query
 #' @export
 
-database_pipeline <- function(org_id, samples.df, is_vfdb){
+database_pipeline <- function(org_id, samples.df, is_vfdb, stdout=FALSE){
   # TODO ####
   # - Will the sbatch command be used for blastn?
 
@@ -44,8 +44,8 @@ database_pipeline <- function(org_id, samples.df, is_vfdb){
             file = here("data", "DB_PIPELINE_OUT.tsv"),
             row.names = FALSE)
   
-  writeLines("DONE: database_pipeline() finished....")
-  output.df
+  writeLines("DONE: database_pipeline() finished...")
+  if(stdout){output.df}
 }
 
 execute_blastout <- function(curr_db, sample, inc_amount){
@@ -65,7 +65,7 @@ execute_blastout <- function(curr_db, sample, inc_amount){
   
   # DATABASE ACCESS ####
   db_dir <- here("data", "databases", curr_db, paste(curr_db, ".fasta", sep = "")) # data/databases/curr_db/curr_db.fasta
-  output_location <- here(paste(curr_db, "_blast_out.tsv", sep = ""))
+  output_location <- here("data", paste(curr_db, "_blast_out.tsv", sep = ""))
   #output_location <- here("data", "databases", curr_db, paste(curr_db, "_blast_out.tsv", sep = "")) # data/curr_db/curr_db.fasta
   
   #-------------
