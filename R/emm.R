@@ -41,7 +41,7 @@ emm <- function(org_id, samples.df, locus){
   
   query_files <- file.path(samples.df[,"parent_dir"], samples.df[,"subdir_id"], samples.df[,"filename"])
   
-  progress_frac <- 1/(length(all_samples)*length(all_loci)) # Determine the incProgress increment amount
+  # progress_frac <- 1/(length(all_samples)*length(all_loci)) # Determine the incProgress increment amount #progressrelated
   
   loci_dna_lookup <- all_loci %>% pmap(~ paste(lookup_dir, "/", .x, ".fasta", sep = ""))
   
@@ -50,8 +50,8 @@ emm <- function(org_id, samples.df, locus){
     if(file.exists(x)){
       new_blast <- data.frame()
       # Need to check if the loci.fasta exists
-      incProgress(amount = progress_frac,
-                  message = paste("Executing emm blast on ", basename(x), sep=""))
+      # incProgress(amount = progress_frac,
+      #            message = paste("Executing emm blast on ", basename(x), sep="")) #progressrelated
       
       # Perform and Read blast
       
