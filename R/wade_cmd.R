@@ -7,7 +7,7 @@ suppressPackageStartupMessages({
   library(here)
 })
 
-source(normalizePath('R/database_pipeline.R'))
+source(normalizePath('R/sourcetesting.R'))
 
 
 #' Check if value matches a pre-defined list of values
@@ -82,22 +82,23 @@ samples <- samples %>% map_df(~ data.frame(fullpath = .x,
                              type = 'file')
 )
 
-test <- 'AMR_DB'
-
-org <- 'GAS'
-
+test <- opt$test
+ 
+org <- opt$organism
+ 
 locus <- 'list'
 
 switch(test,
        AMR_DB = { database_pipeline(org, samples, FALSE) },
-       AMR_LW = { labware_gono_amr() },
        EMM = { emm(org, samples, locus) },
-       MASTER = { master_blastr(org, test, samples, locus) },
+       # Tested to here
        MLST = { general_mlst_pipeline(org, samples, locus, test) },
        NGSTAR = { general_mlst_pipeline(org, samples, locus, test) },
        NGMAST = { general_mlst_pipeline(org, samples, locus, test) },
        rRNA23S = { rna_23s(org, samples) },
-       SERO = { PneumoCaT_pipeline(samples) },
-       VFDB = { database_pipeline(org, samples, TRUE) },
+       # AMR_LW = { labware_gono_amr() },
+       # MASTER = { master_blastr(org, test, samples, locus) },
+       # SERO = { PneumoCaT_pipeline(samples) },
+       # VFDB = { database_pipeline(org, samples, TRUE) },
        { master_blastr(org, test, samples, locus) }
 )
