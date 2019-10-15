@@ -53,7 +53,7 @@ option_list = list(
               help='test'),
   make_option(c('-l', '--locus'),
               type='character',
-              default=NULL,
+              default='list',
               help='locus',
               metavar='character'),
   make_option(c('-s','--samples'),
@@ -65,7 +65,7 @@ option_list = list(
 
 opt_parser = OptionParser(option_list=option_list)
 opt = parse_args(opt_parser)
-
+print(opt) # TESTING ONLY
 if (is.null(opt$samples)) {
   print_help(opt_parser)
   stop('Samples is a required argument', call.=FALSE)
@@ -86,7 +86,7 @@ test <- opt$test
  
 org <- opt$organism
  
-locus <- 'list'
+locus <- opt$locus
 
 switch(test,
        AMR_DB = { database_pipeline(org, samples, FALSE) },

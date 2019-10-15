@@ -29,7 +29,7 @@ database_pipeline <- function(org_id, samples.df, is_vfdb, stdout=FALSE){
   }
 
   # Initializing ####
-  inc_amount <- 1/(length(databases)*nrow(samples.df)) # increment amount, for progress bar
+  # inc_amount <- 1/(length(databases)*nrow(samples.df)) # increment amount, for progress bar #progressrelated
   sample_files <- file.path(samples.df[,"parent_dir"], samples.df[,"subdir_id"], samples.df[,"filename"]) # List of all files and their path
   
   db_samples.df <- databases %>% map_dfr(~ data.frame("db" = .x, 
@@ -52,7 +52,7 @@ execute_blastout <- function(curr_db, sample, inc_amount){
   sample_num <- basename(sample) # Vector of sample names .fasta
   
   #incProgress(amount = inc_amount,
-  #            message = paste("Blasting ", sample_num, " against ", curr_db, sep = ""))
+  #            message = paste("Blasting ", sample_num, " against ", curr_db, sep = ""))#progressrelated
   
   writeLines(paste("Executing blastn for:", sample_num, "on db", curr_db))
   headers <- c("SampleNo", "DataBase", "GeneID", "MatchID")

@@ -81,8 +81,8 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
       
       if(allele_num != "Sample_Err"){ # This is redundant!! Put it before so nothing can execute!
         
-        incProgress(amount = 1/(num_samples*num_loci),
-                    message = paste(seq_type, " Pipeline: ", curr_sample_num, " blastn on ", curr_locus, sep = "")) # Progress ####
+        #incProgress(amount = 1/(num_samples*num_loci),
+        #            message = paste(seq_type, " Pipeline: ", curr_sample_num, " blastn on ", curr_locus, sep = "")) #progressrelated
         
         locus_dna_lookup <- paste(lookup_dir, "/", curr_locus, ".fasta", sep = "")
         
