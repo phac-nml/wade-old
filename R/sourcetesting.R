@@ -9,6 +9,7 @@ source(normalizePath('R/database_pipeline.R'))
 source(normalizePath('R/emm.R'))
 source(normalizePath('R/general_mlst.R'))
 source(normalizePath('R/rRNA.R'))
+source(normalizePath('R/PneumoCaT.R'))
 
 
 # 23S RNA test needs read_vcf from this file

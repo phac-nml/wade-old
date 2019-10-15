@@ -96,9 +96,9 @@ switch(test,
        NGMAST = { general_mlst_pipeline(org, samples, locus, test) },
        rRNA23S = { rna_23s(org, samples) }, # Need proper testing data
        # Tested to here
-       # AMR_LW = { labware_gono_amr() },
-       # MASTER = { master_blastr(org, test, samples, locus) },
-       # SERO = { PneumoCaT_pipeline(samples) },
+       SERO = { PneumoCaT_pipeline(samples) },
        # VFDB = { database_pipeline(org, samples, TRUE) },
+       # MASTER = { master_blastr(org, test, samples, locus) },
+       # AMR_LW = { labware_gono_amr() }, # Not to include for first run through
        { master_blastr(org, test, samples, locus) }
 )

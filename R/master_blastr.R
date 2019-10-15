@@ -28,10 +28,10 @@
 #' @return A table frame containing the results of the query
 #' @export
 
-master_blastr <- function(org_id, test_id, sample_num, locus_id){
+master_blastr <- function(org_id, test_id, sample_num, locus_id, sens="10e-50"){
   # Variables ####
   Variable <- NA
-  Blast_evalue <- "10e-50"            #sets sensitivity of Blast gene match 10e-50 to 10e-150; use 10e-5 for primers
+  Blast_evalue <- sens            #sets sensitivity of Blast gene match 10e-50 to 10e-150; use 10e-5 for primers
 
   #--------------------------------------------------------------------------------------------------------
 
