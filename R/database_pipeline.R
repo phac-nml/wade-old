@@ -65,7 +65,7 @@ execute_blastout <- function(curr_db, sample, inc_amount){
   
   # DATABASE ACCESS ####
   db_dir <- here("data", "databases", curr_db, paste(curr_db, ".fasta", sep = "")) # data/databases/curr_db/curr_db.fasta
-  output_location <- here("data", paste(curr_db, "_blast_out.tsv", sep = ""))
+  output_location <- here("data/output", paste(curr_db, "_blast_out.tsv", sep = ""))
   #output_location <- here("data", "databases", curr_db, paste(curr_db, "_blast_out.tsv", sep = "")) # data/curr_db/curr_db.fasta
   
   #-------------

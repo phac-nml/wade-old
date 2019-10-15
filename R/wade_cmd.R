@@ -89,13 +89,13 @@ org <- opt$organism
 locus <- opt$locus
 
 switch(test,
-       AMR_DB = { database_pipeline(org, samples, FALSE) },
+       AMR_DB = { database_pipeline(org, samples, FALSE) }, # 
        EMM = { emm(org, samples, locus) },
-       # Tested to here
        MLST = { general_mlst_pipeline(org, samples, locus, test) },
        NGSTAR = { general_mlst_pipeline(org, samples, locus, test) },
        NGMAST = { general_mlst_pipeline(org, samples, locus, test) },
-       rRNA23S = { rna_23s(org, samples) },
+       rRNA23S = { rna_23s(org, samples) }, # Need proper testing data
+       # Tested to here
        # AMR_LW = { labware_gono_amr() },
        # MASTER = { master_blastr(org, test, samples, locus) },
        # SERO = { PneumoCaT_pipeline(samples) },
