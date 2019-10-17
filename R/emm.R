@@ -117,10 +117,11 @@ emm <- function(org_id, samples.df, locus){
 write_emm_output <- function(write_blast, blast.df, sample.df, org_id){
   datetime <- format(Sys.time(), "%Y-%m-%d")
   
-  # Multiple output locations
-  emm_blast_file <- here("data", "output", paste(datetime, "_emm_blast.csv", sep=""))
-  emm_file <- here("data", "output", paste(datetime, "_emm.csv", sep=""))
-  emm_labware_file <- here("data", "output", paste(datetime, "_LabWareUpload_GAS_emm.csv", sep=""))
+  # Multiple output files
+  writeLines(paste("Writing output to", here("data", "output")))
+  emm_blast_file <- here("data", "output", paste(Sys.Date(), org_id, "emmBLAST", "WADE.csv", sep = "_"))
+  emm_file <- here("data", "output", paste(Sys.Date(), org_id, "emm", "WADE.csv", sep = "_"))
+  emm_labware_file <- here("data", "output", paste(Sys.Date(), org_id, "emmLW", "WADE.csv", sep = "_"))
   
   if(write_blast){ # We only write the blast when there is one file
     write.csv(blast.df, emm_blast_file, row.names = FALSE)
