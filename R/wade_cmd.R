@@ -90,15 +90,15 @@ locus <- opt$locus
 
 switch(test,
        AMR_DB = { database_pipeline(org, samples, FALSE) }, # 
+       VFDB = { database_pipeline(org, samples, TRUE) },
        EMM = { emm(org, samples, locus) },
        MLST = { general_mlst_pipeline(org, samples, locus, test) },
        NGSTAR = { general_mlst_pipeline(org, samples, locus, test) },
        NGMAST = { general_mlst_pipeline(org, samples, locus, test) },
-       rRNA23S = { rna_23s(org, samples) }, # Need proper testing data
-       VFDB = { database_pipeline(org, samples, TRUE) },
+       rRNA23S = { rna_23s(org, samples) } # Need proper testing data
        # Tested to here
        # SERO = { PneumoCaT_pipeline(samples) }, # Needs Samplenum issue (not sample list) addressed
        # MASTER = { master_blastr(org, test, samples, locus) },
        # AMR_LW = { labware_gono_amr() }, # Not to include for first run through
-       { master_blastr(org, test, samples, locus) }
+       #{ master_blastr(org, test, samples, locus) }
 )

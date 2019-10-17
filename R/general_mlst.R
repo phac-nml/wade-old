@@ -11,6 +11,9 @@
 #' @export
 
 general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
+  if (seq_type %notin% c("MLST", "NGMAST", "NSTAR")) {
+    stop('General MLST seq_type must be one of MLST, NGMAST, or NSTAR', call.=FALSE)
+  }
 
   # ------------- Directories ----------------
   db_dir <- paste("data/databases")
