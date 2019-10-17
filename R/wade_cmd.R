@@ -85,7 +85,7 @@ samples <- samples %>% map_df(~ data.frame(fullpath = .x,
 test <- opt$test
  
 org <- opt$organism
- 
+
 locus <- opt$locus
 
 switch(test,
