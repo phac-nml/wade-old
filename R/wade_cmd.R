@@ -60,6 +60,11 @@ option_list = list(
               type='character',
               default=c(),
               help='samples to analyse (comma separated list of files)',
+              metavar='character'),
+  make_option(c('-d','--outdir'),
+              type='character',
+              default=NULL,
+              help='Output directory',
               metavar='character')
 )
 
@@ -82,14 +87,16 @@ samples <- samples %>% map_df(~ data.frame(fullpath = .x,
                              type = 'file')
 )
 
-test <- opt$test
- 
-org <- opt$organism
 
+test <- opt$test
+org <- opt$organism
 locus <- opt$locus
+out_location <- if_else(is.null(opt$outdir), 
+                        here("output"),
+                        normalizePath(opt$outdir))
 
 switch(test,
-       AMR_DB = { database_pipeline(org, samples, FALSE) }, # 
+       AMR_DB = { database_pipeline(org, samples, out_location, FALSE) }, # 
        VFDB = { database_pipeline(org, samples, TRUE) },
        EMM = { emm(org, samples, locus) },
        MLST = { general_mlst_pipeline(org, samples, locus, test) },

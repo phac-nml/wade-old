@@ -241,7 +241,7 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
     sample_out.df$ST <- paste("porB-", sample_out.df$porB, sep = "")
   }
   
-  if(num_loci == 1){ # If we only used one loci
+  if(num_loci == 1){ # If we only used one loci - Not in first Galaxy iteration
     out_file <- here("data", "output", org_id, paste(org_id, "_MLST_blast.csv", sep = ""))
     write.csv(blast_out.df, out_file, row.names = FALSE)
     
@@ -294,7 +294,7 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
     }
 
     writeLines("DONE: general_mlst_pipeline()")
-    return(sample_out.df)
+    return(sample_out.df) # Files saved, why print?
   }
 
 } # general_mlst_pipeline()
