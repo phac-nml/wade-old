@@ -35,10 +35,10 @@
 #'
 #' @export
 
-rna_23s <- function(org_id, samples.df){
+rna_23s <- function(org_id, samples){
   # ------------------ Organism Variables ------------------
   rna_dir <- here("data/databases", org_id, "23S_rRNA")
-  vcf_folder <- paste(rna_dir, "/VCF", sep = "")
+  # vcf_folder <- paste(rna_dir, "/VCF", sep = "")
 
   switch(org_id,
          GONO = {
@@ -64,9 +64,10 @@ rna_23s <- function(org_id, samples.df){
 
   # Get a list of sample.vcf
   #   We replace the extension and then append the location of where the file should exist
-  vcf_paths <- samples.df["filename"] %>% map(~ file.path(vcf_folder, replace_file_ext(.x, ".vcf")))
+  #vcf_paths <- samples.df["filename"] %>% map(~ file.path(vcf_folder, replace_file_ext(.x, ".vcf")))
   
-  vcf_files.df <- unlist(vcf_paths) %>% map_df(~ read_vcf(.x)) # read the .vcf's and return a df
+  #vcf_files.df <- unlist(vcf_paths) %>% map_df(~ read_vcf(.x)) # read the .vcf's and return a df
+  vcf_files.df <- samples["fullpath"] %>% map_df(~ read_vcf(.x))
 
   # ------------------ Query Data Frames ------------------
   values <- map(1:nrow(vcf_files.df), function(x){ # Go through the rows of A SINGLE df
