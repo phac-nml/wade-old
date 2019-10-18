@@ -19,6 +19,7 @@
 #' @export
 
 database_pipeline <- function(org_id, samples.df, is_vfdb, stdout=FALSE){
+  
   # TODO ####
   # - Will the sbatch command be used for blastn?
 
@@ -39,17 +40,17 @@ database_pipeline <- function(org_id, samples.df, is_vfdb, stdout=FALSE){
   output.df <- map2_df(db_samples.df[,"db"], db_samples.df[,"sample"], ~ execute_blastout(.x, .y, inc_amount)) %>%
     select("SampleNo", "DataBase", "GeneID", "MatchID") # Just rearranging the columns here
   
-  output_location <- paste(here("data", "output", paste(Sys.Date(), org_id, "dbpipeline", "WADE.csv", sep = "_")))
-  writeLines(paste("Writing output to", output_location))
+  outfile <- paste(out_location, paste(Sys.Date(), org_id, "dbpipeline", "WADE.csv", sep = "_"), sep = "")
+  writeLines(paste("Writing output to", outfile))
   write.csv(x = output.df,
-            file = output_location,
+            file = outfile,
             row.names = FALSE)
   
   writeLines("DONE: database_pipeline() finished...")
   if(stdout){output.df}
 }
 
-execute_blastout <- function(curr_db, sample, inc_amount){
+execute_blastout <- function(curr_db, sample, inc_amount, out=out_location){
   sample_num <- basename(sample) # Vector of sample names .fasta
   
   #incProgress(amount = inc_amount,
@@ -66,14 +67,17 @@ execute_blastout <- function(curr_db, sample, inc_amount){
   
   # DATABASE ACCESS ####
   db_dir <- here("data", "databases", curr_db, paste(curr_db, ".fasta", sep = "")) # data/databases/curr_db/curr_db.fasta
-  output_location <- here("data/output", paste(curr_db, "_blast_out.tsv", sep = ""))
-  #output_location <- here("data", "databases", curr_db, paste(curr_db, "_blast_out.tsv", sep = "")) # data/curr_db/curr_db.fasta
+  # output_location <- here("data/output", paste(curr_db, "_blast_out.tsv", sep = ""))
+  # output_location <- here("data", "databases", curr_db, paste(curr_db, "_blast_out.tsv", sep = "")) # data/curr_db/curr_db.fasta
+  
+  
+  blastout <- paste(out, curr_db, "_blast_out.tsv", sep = "")
   
   #-------------
   # using "-outfmt 6" in the blast command provides us with an output table to read from. This there's no need to
   #   parse through a file, line by painful line.
   blast_command <- paste("blastn -db ", db_dir, " -query ",
-                         sample, " -outfmt 6 -out ", output_location, " -evalue ", blast_evalue, sep = "")
+                          sample, " -outfmt 6 -out ", blastout, " -evalue ", blast_evalue, sep = "")
   sys_command <- blast_command
   
   # If batch command is needed ####  
@@ -82,11 +86,11 @@ execute_blastout <- function(curr_db, sample, inc_amount){
   
   try(system(sys_command)) # Blast command call
   
-  info <- file.info(output_location)
+  info <- file.info(blastout)
   
   if(!is.na(info) && info$size > 0){
     # Read the table to get both the GeneID and MatchID
-    table <- read.table(file = output_location, stringsAsFactors = FALSE)
+    table <- read.table(file = blastout, stringsAsFactors = FALSE)
     curr_blast_table.df <- select(table, "V1", "V2")
     names(curr_blast_table.df) <- c("GeneID", "MatchID")
     

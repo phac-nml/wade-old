@@ -91,8 +91,10 @@ test <- opt$test
 org <- opt$organism
 locus <- opt$locus
 out_location <- if_else(is.na(opt$outdir), 
-                        here("output"),
+                        here("output/"),
                         suppressWarnings(normalizePath(opt$outdir))) # Throws warnings for some reason. Seems like if_else() evaluates all code within it even if the logical dictates otherwise
+
+try(system(paste("mkdir", out_location)))
 
 switch(test,
        AMR_DB = { database_pipeline(org, samples, FALSE) }, # 
