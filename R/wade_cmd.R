@@ -5,6 +5,7 @@ suppressPackageStartupMessages({
   library(dplyr)
   library(purrr)
   library(here)
+  library(stringr)
 })
 
 source(normalizePath('R/sourcetesting.R'))
@@ -84,8 +85,9 @@ samples <- samples %>% map_df(~ data.frame(fullpath = .x,
                              parent_dir = base::dirname(base::dirname(.x)),
                              subdir_id = base::basename(base::dirname(.x)),
                              filename = base::basename(.x),
-                             type = 'file')
-)
+                             type = 'file')) %>% 
+  mutate_if(is.factor, as.character)
+
 
 test <- opt$test
 org <- opt$organism

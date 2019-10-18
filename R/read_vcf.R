@@ -28,7 +28,7 @@ read_vcf <- function(path){
                              colClasses = "character")
     close(curr_file)
 
-    names(in_file.df) <- as.list(header[[1]]) # name the columns
+    names(in_file.df) <- header[[1]] # name the columns
     in_file.df$SampleNo <- str_remove(basename(path), ".vcf") # Assign a new column tracking the sample number it's from
     typeof(in_file.df$SampleNo)
     # Return ####
