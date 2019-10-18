@@ -63,7 +63,7 @@ option_list = list(
               metavar='character'),
   make_option(c('-d','--outdir'),
               type='character',
-              default=NULL,
+              default=NA,
               help='Output directory',
               metavar='character')
 )
@@ -87,16 +87,15 @@ samples <- samples %>% map_df(~ data.frame(fullpath = .x,
                              type = 'file')
 )
 
-
 test <- opt$test
 org <- opt$organism
 locus <- opt$locus
-out_location <- if_else(is.null(opt$outdir), 
+out_location <- if_else(is.na(opt$outdir), 
                         here("output"),
-                        normalizePath(opt$outdir))
+                        suppressWarnings(normalizePath(opt$outdir))) # Throws warnings for some reason. Seems like if_else() evaluates all code within it even if the logical dictates otherwise
 
 switch(test,
-       AMR_DB = { database_pipeline(org, samples, out_location, FALSE) }, # 
+       AMR_DB = { database_pipeline(org, samples, FALSE) }, # 
        VFDB = { database_pipeline(org, samples, TRUE) },
        EMM = { emm(org, samples, locus) },
        MLST = { general_mlst_pipeline(org, samples, locus, test) },
