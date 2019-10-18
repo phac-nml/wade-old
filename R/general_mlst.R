@@ -23,7 +23,8 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
   temp_dir <- here(db_dir, org_id, seq_type, "temp") # Temporary
   profiles_dir <- paste(temp_dir, "/", "profiles.csv", sep = "")
   loci.list <- paste(temp_dir, "/", "loci.csv", sep = "") # Loci list
-  blast_out_file <- here("data", "output", "blastout.txt")
+  blast_out_file <- paste(out_location, org_id, "_blast_out.tsv", sep = "")
+  
   
   if(!file.exists(blast_out_file)){
     file.create(blast_out_file) # If it doesn't exist yet just create it.
@@ -242,54 +243,53 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
   }
   
   if(num_loci == 1){ # If we only used one loci - Not in first Galaxy iteration
-    out_file <- here("data", "output", org_id, paste(org_id, "_MLST_blast.csv", sep = ""))
+    out_file <- paste(out_location, paste(Sys.Date(), org_id, "MLST-blast", "WADE.csv", sep = "_"), sep = "")
     write.csv(blast_out.df, out_file, row.names = FALSE)
-    
     writeLines("DONE: general_mlst_pipeline()")
+    
     return(blast_out.df)
+    
   } else {
     
     # ---------------- File Output ----------------
     
-    out_location <- here("data", "output", org_id)
-    
     if(seq_type == "MLST"){
       # --- MLST out
+      # These write the exact same things with different names...
+      
       write.csv(sample_out.df,
-                paste(out_location, "/", org_id, "_MLST.csv", sep = ""),
+                paste(out_location, paste(Sys.Date(), org_id, "MLST", "WADE.csv", sep = "_"), sep = ""),
                 quote = FALSE,  row.names = FALSE)
       
       write.csv(sample_out.df,
-                paste(out_location, "/output_profile_MLST.csv", sep = ""),
+                paste(out_location, paste(Sys.Date(), org_id, "MLST-profile", "WADE.csv", sep = "_"), sep = ""),
                 quote = FALSE,
                 row.names = FALSE)
       writeLines("--- profile_mlst.csv ---")
+      
     } else {
-      lw_out <- paste("LabWareUpload_GONO_", seq_type, ".csv", sep = "")
-      writeLines(paste("Writing out: ", lw_out, sep = ""))
+      
       write.csv(sample_out.df,
-                paste(out_location, "/", lw_out, sep = ""),
+                paste(out_location, paste(Sys.Date(), org_id, "LabwareUpload", "WADE.csv", sep = "_"), sep = ""),
                 quote = FALSE,
                 row.names = FALSE)
       
-      profile_out <- paste("output_profile_GONO_", seq_type, ".csv", sep = "")
-      writeLines(paste("Writing out: ", profile_out, sep = ""))
       write.csv(sample_out.df,
-                paste(out_location, "/", profile_out, sep = ""),
+                paste(out_location, paste(Sys.Date(), org_id, "MLST-profile", "WADE.csv", sep = "_"), sep = ""),
                 quote = FALSE,
                 row.names = FALSE)
     }
 
     if(seq_type == "NGSTAR"){
-      writeLines(paste("Writing out: output_profile_mut.csv"))
+      
       write.csv(sample_mut_out.df,
-                paste(out_location, "/output_profile_mut.csv", sep = ""),
+                paste(out_location, paste(Sys.Date(), org_id, "NGSTAR-mut", "WADE.csv", sep = "_"), sep = ""),
                 quote = FALSE,
                 row.names = FALSE)
     } else if(seq_type == "NGMAST"){
       # --- NGMAST out
       write.csv(sample_out.df,
-                paste(out_location, "/output_profile.csv", sep = ""),
+                paste(out_location, paste(Sys.Date(), org_id, "NGMAST-profile", "WADE.csv", sep = "_"), sep = ""),
                 row.names = FALSE)
     }
 
