@@ -14,7 +14,7 @@ emm <- function(org_id, samples.df, locus){
   contigs_dir <- here("data", "databases", org_id, "assemblies")
   lookup_dir <- here("data", "databases", org_id, "EMM", "allele_lkup_dna")
   all_loci <- here("data", "databases", org_id, "EMM", "temp", "loci.csv") # Location of the loci
-  blast_out_file <- here("data", "output", "blastout.csv") # A temporary location to hold the blast output (Is deleted later)
+  blast_out_file <- paste(out_location, "emm_blast_out.csv", sep = "") # A temporary location to hold the blast output (Is deleted later)
 
   # ---------------- Variables ----------------
   error <- "Sample_Err"
@@ -114,14 +114,15 @@ emm <- function(org_id, samples.df, locus){
 # write_emm_output()
 #
 # create .csv's based on the given parameters
-write_emm_output <- function(write_blast, blast.df, sample.df, org_id){
+write_emm_output <- function(write_blast, blast.df, sample.df, org_id, out=out_location){
   datetime <- format(Sys.time(), "%Y-%m-%d")
   
   # Multiple output files
-  writeLines(paste("Writing output to", here("data", "output")))
-  emm_blast_file <- here("data", "output", paste(Sys.Date(), org_id, "emmBLAST", "WADE.csv", sep = "_"))
-  emm_file <- here("data", "output", paste(Sys.Date(), org_id, "emm", "WADE.csv", sep = "_"))
-  emm_labware_file <- here("data", "output", paste(Sys.Date(), org_id, "emmLW", "WADE.csv", sep = "_"))
+  writeLines(paste("Writing output to", out))
+  
+  emm_blast_file <- paste(out, paste(Sys.Date(), org_id, "emmBLAST", "WADE.csv", sep = "_"), sep = "")
+  emm_file <- paste(out, paste(Sys.Date(), org_id, "emm", "WADE.csv", sep = "_"), sep = "")
+  emm_labware_file <- paste(out, paste(Sys.Date(), org_id, "emmLW", "WADE.csv", sep = "_"), sep = "")
   
   if(write_blast){ # We only write the blast when there is one file
     write.csv(blast.df, emm_blast_file, row.names = FALSE)
