@@ -4,15 +4,18 @@
 # Run this in terminal
 # for o in GAS GONO PNEUMO; do echo Rscript R/wade_cmd.R -o $o -t TEST -s ~/testswade/SC10-1841-A.fasta; don
 
-# Fake CL args
-opt <- list(organism = "GAS",
-            test = "rRNA23S",
-            samples = "./testdata/WADE/test.vcf",
-            locus="list",
-            outdir=NA)
-out_location <- here("output")
 
-path <- "./testdata/WADE/test.vcf"
+# Call library statements
+library(stringr)
+
+# Fake CL args
+# opt <- list(organism = "GAS",
+#             test = "rRNA23S",
+#             samples = "~/testswade/test.vcf",
+#             locus="list",
+#             outdir=NA)
+# out_location <- here("output")
+# path <- "./testdata/WADE/test.vcf"
 
 # Shared functions, 'utilities.R' eventually
 `%notin%` <- Negate(`%in%`)

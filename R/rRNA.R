@@ -56,6 +56,9 @@ rna_23s <- function(org_id, samples){
                                          POS = 2061)
            rRNA23S_pos2.df <- data.frame(CHROM = chrom,
                                          POS = 2613)
+         },
+         {
+           stop("Organism must be one of GONO or PNEUMO")
          }
   )
 
