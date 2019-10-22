@@ -1,7 +1,7 @@
 #' rRNA.R
 #'
 #' @param org_id Organism to query: GAS, PNEUMO or GONO
-#' @param samples.df Data frame of user selected samples and the sample paths
+#' @param samples Data frame of user selected samples and the sample paths
 #' 
 #' @return A data frame containing the results of the query
 #' 

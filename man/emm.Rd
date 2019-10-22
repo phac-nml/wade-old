@@ -7,11 +7,11 @@
 emm(org_id, samples.df, locus)
 }
 \arguments{
+\item{org_id}{Organism to query: GAS, PNEUMO or GONO}
+
 \item{samples.df}{Data frame of user selected samples and the sample paths}
 
 \item{locus}{Sample number associated with contig.fasta file}
-
-\item{Org_id}{Organism to query: GAS, PNEUMO or GONO}
 }
 \value{
 A table frame containing the results of the query
