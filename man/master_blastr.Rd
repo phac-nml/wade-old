@@ -4,7 +4,7 @@
 \alias{master_blastr}
 \title{Molecular typing pipeline for WGS assemblies}
 \usage{
-master_blastr(org_id, test_id, sample_num, locus_id)
+master_blastr(org_id, test_id, sample_num, locus_id, sens = "10e-50")
 }
 \arguments{
 \item{org_id}{Organism to query: GAS, PNEUMO or GONO}

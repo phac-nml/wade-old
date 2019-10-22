@@ -2,8 +2,7 @@
 % Please edit documentation in R/read_vcf.R
 \name{read_vcf}
 \alias{read_vcf}
-\title{read_vcf.R
-Reads a .vcf file ignoring any headers, creates a data frame from the remaining lines}
+\title{Reads a .vcf file ignoring any headers, creates a data frame from the remaining lines}
 \usage{
 read_vcf(path)
 }

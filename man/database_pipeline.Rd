@@ -2,10 +2,9 @@
 % Please edit documentation in R/database_pipeline.R
 \name{database_pipeline}
 \alias{database_pipeline}
-\title{database_pipeline.R
-Generic Profiler : SampleNo_contigs.fasta vs. arg-annot/resfinder2/CARD or VFDB}
+\title{Generic Profiler : SampleNo_contigs.fasta vs. arg-annot/resfinder2/CARD or VFDB}
 \usage{
-database_pipeline(org_id, samples.df, is_vfdb)
+database_pipeline(org_id, samples.df, is_vfdb, stdout = FALSE)
 }
 \arguments{
 \item{org_id}{Organism to query: GAS or GONO}
@@ -13,12 +12,13 @@ database_pipeline(org_id, samples.df, is_vfdb)
 \item{samples.df}{Data frame of user selected samples and the sample paths}
 
 \item{is_vfdb}{Boolean, determine which database is being used. Specified from main call}
+
+\item{stdout}{Boolean, write df to stdout? Specified from main call}
 }
 \value{
 A table frame containing the results of the query
 }
 \description{
-database_pipeline.R
 Generic Profiler : SampleNo_contigs.fasta vs. arg-annot/resfinder2/CARD or VFDB
 }
 \details{
