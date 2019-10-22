@@ -5,6 +5,10 @@
 #' 
 #' @return A data frame containing the results of the query
 #' 
+#' @importFrom dplyr bind_rows
+#' @importFrom purrr is_empty map_df map
+#' @importFrom stringr str_remove str_split
+#' @import here
 #' @details
 #' 23S rRNA pipeline for WGS assemblies to determine number of mutated alleles
 #'

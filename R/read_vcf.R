@@ -6,6 +6,7 @@
 #'
 #' @param path The path to file corresponding .vcf file
 #' @return A Data Frame of the data from a .vcf
+#' @importFrom stringr str_remove str_split
 #'
 
 read_vcf <- function(path){

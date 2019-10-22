@@ -9,7 +9,9 @@
 #' CTRL-C to exit watch.
 
 #' @param sample_num Sample number associated with contig.fasta file
-
+#' @importFrom dplyr bind_rows
+#' @importFrom stringr str_detect
+#' @import here
 #' @return A table frame containing the results of the query
 #' @export
 

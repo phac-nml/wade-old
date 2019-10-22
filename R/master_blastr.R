@@ -25,6 +25,9 @@
 #' cpA, fctA, fctB, lepA and srtC1 all pilin proteins - use only fctA (major pilin protein)
 #' fbp54, grab, ideS_mac, mf_spd, speB, scpA, ska always positive?
 #' hasA,B,C are the same operon, use only hasA
+#' @importFrom dplyr filter bind_cols
+#' @importFrom stringr str_detect str_length str_replace_all str_sub
+#' @import here
 #' @return A table frame containing the results of the query
 #' @export
 
