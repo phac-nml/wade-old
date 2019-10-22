@@ -9,6 +9,8 @@
 #' @importFrom purrr is_empty map_df map
 #' @importFrom stringr str_remove str_split
 #' @import here
+#' @import utils
+#' @import magrittr
 #' @details
 #' 23S rRNA pipeline for WGS assemblies to determine number of mutated alleles
 #'

@@ -28,6 +28,7 @@
 #' @importFrom dplyr filter bind_cols
 #' @importFrom stringr str_detect str_length str_replace_all str_sub
 #' @import here
+#' @import utils
 #' @return A table frame containing the results of the query
 #' @export
 

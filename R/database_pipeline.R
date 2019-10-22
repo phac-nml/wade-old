@@ -19,6 +19,8 @@
 #' @importFrom dplyr mutate select
 #' @importFrom purrr map_dfr map2_df
 #' @import here
+#' @import utils
+#' @import magrittr
 #' @return A table frame containing the results of the query
 #' @export
 

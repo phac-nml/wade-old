@@ -12,6 +12,7 @@
 #' @importFrom dplyr bind_rows
 #' @importFrom stringr str_detect
 #' @import here
+#' @import utils
 #' @return A table frame containing the results of the query
 #' @export
 

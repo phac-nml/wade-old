@@ -9,6 +9,7 @@
 #'
 #' @importFrom dplyr filter arrange bind_cols bind_rows select
 #' @import here
+#' @import utils
 #' @return A profile containing the sample number, and the loci tested on
 #' @export
 

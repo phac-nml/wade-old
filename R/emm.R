@@ -7,6 +7,8 @@
 #' @importFrom dplyr filter bind_rows
 #' @importFrom purrr is_empty map_df pmap
 #' @import here
+#' @import utils
+#' @import magrittr
 #' @return A table frame containing the results of the query
 #' @export
 
