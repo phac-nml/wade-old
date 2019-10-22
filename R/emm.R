@@ -4,7 +4,9 @@
 #' @param Org_id Organism to query: GAS, PNEUMO or GONO
 #' @param samples.df Data frame of user selected samples and the sample paths
 #' @param locus Sample number associated with contig.fasta file
-
+#' @importFrom dplyr filter bind_rows
+#' @importFrom purrr is_empty map_df pmap
+#' @import here
 #' @return A table frame containing the results of the query
 #' @export
 
