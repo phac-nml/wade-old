@@ -19,9 +19,9 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
   }
 
   # ------------- Directories ----------------
-  db_dir <- paste("data/databases")
+  db_dir <- paste("extdata/databases")
 
-  contigs_dir <- here("data", "databases", org_id, "assemblies") # Where are the assemblies
+  contigs_dir <- here("extdata", "databases", org_id, "assemblies") # Where are the assemblies
   lookup_dir <- here(db_dir, org_id, seq_type, "allele_lkup_dna") # Lookups
   temp_dir <- here(db_dir, org_id, seq_type, "temp") # Temporary
   profiles_dir <- paste(temp_dir, "/", "profiles.csv", sep = "")
