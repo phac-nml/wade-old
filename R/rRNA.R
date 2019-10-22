@@ -12,7 +12,6 @@
 #'
 #' GONO:
 #' Run SNP core pipeline with NCCP11945_23S4.fasta file: A2045G or C2597T
-
 #' PNEUMO:
 #' Run SNP core pipeline with 23S_R6.fasta file: A2061G or C2613T
 #'

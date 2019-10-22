@@ -3,6 +3,7 @@
 #' @param org_id Organism to query: GAS or GONO
 #' @param samples.df Data frame of user selected samples and the sample paths
 #' @param is_vfdb Boolean, determine which database is being used. Specified from main call
+#' @param stdout Boolean, write df to stdout? Specified from main call
 #'
 #' @details
 #' GAS AMR loci
@@ -15,6 +16,9 @@
 #'
 #' VFDB is a downloaded from the web site as a single multifasta
 #'
+#' @importFrom dplyr mutate select
+#' @importFrom purrr map_dfr map2_df
+#' @import here
 #' @return A table frame containing the results of the query
 #' @export
 
