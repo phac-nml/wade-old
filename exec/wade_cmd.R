@@ -2,6 +2,7 @@ sink(stdout(), type = 'message')
 
 suppressPackageStartupMessages({
   library(optparse)
+  library(wade)
   library(dplyr)
   library(purrr)
   library(here)
