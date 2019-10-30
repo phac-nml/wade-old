@@ -1,6 +1,6 @@
 Package: wade
 Title: Executes molecular typing on contig assemblies
-Version: 0.1.1
+Version: 0.2.0
 Authors@R: person("Justin", "Band", email = "justin.band@canada.ca", role = c("aut", "cre"))
 Description: Creates an output_profile.csv of molecular typing results.
 Depends: R (>= 3.6)
