@@ -1,0 +1,3 @@
+[submodule "extdata"]
+	path = extdata
+	url = https://github.com/phac-nml/wade-data.git
