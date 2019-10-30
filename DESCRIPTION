@@ -13,6 +13,7 @@ Imports:
     here,
     purrr,
     magrittr,
-    stringr
+    stringr,
+    optparse
 Suggests: 
 	testthat
