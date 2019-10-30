@@ -8,14 +8,13 @@
 `%notin%` <- Negate(`%in%`)
 
 
+# .onAttach <- function(libname, pkgname) {
+#   packageStartupMessage("Welcome to WADE")
+# }
 
-# Create filecache environment to store filename outside of all functions
-.onAttach <- function(libname, pkgname) {
-  packageStartupMessage("Welcome to WADE")
-}
 
-# On load fix the notes:
 
+# On load create global variables:
 .onLoad <- function(libname, pkgname){
   utils::globalVariables(c("out_location", 
                            "Locus_id",

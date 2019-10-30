@@ -56,7 +56,7 @@ option_list = list(
   make_option(c('-l', '--locus'),
               type='character',
               default='list',
-              help='locus',
+              help='locus name or list, default is list',
               metavar='character'),
   make_option(c('-s','--samples'),
               type='character',
@@ -66,7 +66,7 @@ option_list = list(
   make_option(c('-d','--outdir'),
               type='character',
               default=NA,
-              help='Output directory',
+              help='Output directory: default is ./output/',
               metavar='character')
 )
 
