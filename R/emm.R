@@ -15,9 +15,9 @@
 emm <- function(org_id, samples.df, locus){
   
   # Directories ####
-  contigs_dir <- here("data", "databases", org_id, "assemblies")
-  lookup_dir <- here("data", "databases", org_id, "EMM", "allele_lkup_dna")
-  all_loci <- here("data", "databases", org_id, "EMM", "temp", "loci.csv") # Location of the loci
+  
+  lookup_dir <- system.file(paste("extdata/databases", org_id, "EMM", "allele_lkup_dna", sep = "/"), package = "wade") # extdata/databases/curr_db/curr_db.fasta
+  all_loci <- system.file(paste("extdata/databases", org_id, "EMM", "temp", "loci.csv", sep = "/"), package = "wade") # Location of the loci
   blast_out_file <- paste(out_location, "emm_blast_out.csv", sep = "") # A temporary location to hold the blast output (Is deleted later)
 
   # ---------------- Variables ----------------
