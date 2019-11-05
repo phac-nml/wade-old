@@ -85,13 +85,12 @@ execute_blastout <- function(curr_db, sample, inc_amount, out=out_location){
   #   parse through a file, line by painful line.
   blast_command <- paste("blastn -db ", db_dir, " -query ",
                           sample, " -outfmt 6 -out ", blastout, " -evalue ", blast_evalue, sep = "")
-  sys_command <- blast_command
   
   # If batch command is needed ####  
   # sbatch_command <- "sbatch -p NMLResearch -c 1 --mem=1G -J %u-database_pipeline-%J --wrap=" # Use a better job name
   # sys_command <- paste(sbatch_command, "'", blast_command, "'", sep = "")
   
-  try(system(sys_command)) # Blast command call
+  try(system(blast_command)) # Blast command call
   
   info <- file.info(blastout)
   
