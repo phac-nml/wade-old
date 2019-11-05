@@ -72,7 +72,8 @@ execute_blastout <- function(curr_db, sample, inc_amount, out=out_location){
   }
   
   # DATABASE ACCESS ####
-  db_dir <- here("extdata", "databases", curr_db, paste(curr_db, ".fasta", sep = "")) # data/databases/curr_db/curr_db.fasta
+  db_dir <- system.file(paste("extdata/databases", curr_db, paste(curr_db, ".fasta", sep = ""), sep = "/"), package = "wade") # extdata/databases/curr_db/curr_db.fasta
+  
   # output_location <- here("data/output", paste(curr_db, "_blast_out.tsv", sep = ""))
   # output_location <- here("data", "databases", curr_db, paste(curr_db, "_blast_out.tsv", sep = "")) # data/curr_db/curr_db.fasta
   
