@@ -19,11 +19,9 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
   }
 
   # ------------- Directories ----------------
-  db_dir <- paste("extdata/databases")
-
-  contigs_dir <- here("extdata", "databases", org_id, "assemblies") # Where are the assemblies
-  lookup_dir <- here(db_dir, org_id, seq_type, "allele_lkup_dna") # Lookups
-  temp_dir <- here(db_dir, org_id, seq_type, "temp") # Temporary
+  db_dir <- system.file("extdata/databases", package = "wade") # extdata/databases/curr_db/curr_db.fasta
+  lookup_dir <- paste(db_dir, org_id, seq_type, "allele_lkup_dna", sep = "/")  # Lookups
+  temp_dir <- paste(db_dir, org_id, seq_type, "temp", sep="/") # Temporary
   profiles_dir <- paste(temp_dir, "/", "profiles.csv", sep = "")
   loci.list <- paste(temp_dir, "/", "loci.csv", sep = "") # Loci list
   blast_out_file <- paste(out_location, org_id, "_blast_out.tsv", sep = "")
