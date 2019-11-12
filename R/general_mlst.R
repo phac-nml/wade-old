@@ -65,7 +65,7 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
     curr_sample_num <- sub("([^.]+)\\.[[:alnum:]]+$", "\\1", samples.df[i, "filename"])
     curr_file <- file.path(samples.df[i, "parent_dir"], samples.df[i, "subdir_id"], samples.df[i, "filename"])
     
-    dest_file <- here("data", "queryfile.fasta") # Still need a finalized location
+    dest_file <- paste(out_location, "queryfile.fasta", sep = "/") # Still need a finalized location
     if(!file.exists(dest_file)){
       file.create(dest_file) # If it doesn't exist yet just create it.
     }

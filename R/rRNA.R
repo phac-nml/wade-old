@@ -42,7 +42,8 @@
 
 rna_23s <- function(org_id, samples){
   # ------------------ Organism Variables ------------------
-  rna_dir <- here("extdata/databases", org_id, "23S_rRNA")
+  rna_dir <- system.file(paste("extdata/databases", org_id, "23S_rRNA", sep = "/"), package = "wade") # extdata/databases/curr_db/curr_db.fasta
+  
   # vcf_folder <- paste(rna_dir, "/VCF", sep = "")
 
   switch(org_id,
