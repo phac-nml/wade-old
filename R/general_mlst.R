@@ -291,6 +291,7 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
       # --- NGMAST out
       write.csv(sample_out.df,
                 paste(out_location, paste(Sys.Date(), org_id, "NGMAST-profile", "WADE.csv", sep = "_"), sep = ""),
+                quote = FALSE,
                 row.names = FALSE)
     }
 
