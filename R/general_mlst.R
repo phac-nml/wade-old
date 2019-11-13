@@ -14,8 +14,8 @@
 #' @export
 
 general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
-  if (seq_type %notin% c("MLST", "NGMAST", "NSTAR")) {
-    stop('General MLST seq_type must be one of MLST, NGMAST, or NSTAR', call.=FALSE)
+  if (seq_type %notin% c("MLST", "NGMAST", "NGSTAR")) {
+    stop('General MLST seq_type must be one of MLST, NGMAST, or NGSTAR', call.=FALSE)
   }
 
   # ------------- Directories ----------------
@@ -65,12 +65,12 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
     curr_sample_num <- sub("([^.]+)\\.[[:alnum:]]+$", "\\1", samples.df[i, "filename"])
     curr_file <- file.path(samples.df[i, "parent_dir"], samples.df[i, "subdir_id"], samples.df[i, "filename"])
     
-    dest_file <- paste(out_location, "queryfile.fasta", sep = "/") # Still need a finalized location
+    dest_file <- paste(out_location, "queryfile.fasta", sep = "") 
     if(!file.exists(dest_file)){
       file.create(dest_file) # If it doesn't exist yet just create it.
     }
     
-    if(!file.copy(curr_file, dest_file, overwrite = TRUE)){
+    if(!file.copy(curr_file, dest_file, overwrite = TRUE, copy.mode = FALSE)){
       allele <- "Sample Number Error" # Do we need this?
       allele_num <- "Sample_Err"
     }
@@ -253,7 +253,7 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
   } else {
     
     # ---------------- File Output ----------------
-    
+    print(sample_out.df)
     if(seq_type == "MLST"){
       # --- MLST out
       # These write the exact same things with different names...
