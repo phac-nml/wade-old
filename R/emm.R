@@ -13,7 +13,9 @@
 #' @export
 
 emm <- function(org_id, samples.df, locus){
-  
+  if (org_id %notin% c("GAS")) {
+    stop('EMM typing is only for Group A Strep (GAS)', call.=FALSE)
+  }
   # Directories ####
   
   lookup_dir <- system.file(paste("extdata/databases", org_id, "EMM", "allele_lkup_dna", sep = "/"), package = "wade") # extdata/databases/curr_db/curr_db.fasta
