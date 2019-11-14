@@ -1,4 +1,4 @@
-sink(stdout(), type = 'message')
+sink(stdout(), type = 'output')
 
 suppressPackageStartupMessages({
   library(optparse)
@@ -106,7 +106,7 @@ switch(test,
        MLST = { general_mlst_pipeline(org, samples, locus, test) },
        NGSTAR = { general_mlst_pipeline(org, samples, locus, test) },
        NGMAST = { general_mlst_pipeline(org, samples, locus, test) },
-       rRNA23S = { rna_23s(org, samples) } # Need proper testing data
+       rRNA23S = { rna_23s(org, samples) } 
        # Tested to here
        # SERO = { PneumoCaT_pipeline(samples) }, # Needs Samplenum issue (not sample list) addressed
        # MASTER = { master_blastr(org, test, samples, locus) },
