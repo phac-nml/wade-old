@@ -13,6 +13,15 @@ labware_gono_amr <- function(amrDF, ngstarDF, rnaDF) {
   
   AMR_Output.df <- amrDF
   NGSTAR_Output.df <- ngstarDF
+  
+  # Testing
+  # NGSTAR_Output.df <- read.csv(here("output","output_profile_mut.csv"),
+  #                              header = TRUE,
+  #                              sep = ",",
+  #                              stringsAsFactors = FALSE)
+
+  
+  
   rRNA23S_Output.df <- rnaDF
   
   
@@ -71,8 +80,8 @@ labware_gono_amr <- function(amrDF, ngstarDF, rnaDF) {
   ErrorFound <- FALSE
 
   # Iteration ####
-  for (m in 1L:NumSamples)  #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Build Molecular Profile
-  {
+  for (m in 1L:NumSamples){ #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Build Molecular Profile
+  
     molec_profile <- NA
 
     lw_CurrSampleNo <- as.character(Combined_Output.df[m, "SampleNo"])

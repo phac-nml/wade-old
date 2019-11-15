@@ -57,7 +57,9 @@ database_pipeline <- function(org_id, samples.df, is_vfdb, stdout=FALSE){
 }
 
 execute_blastout <- function(curr_db, sample, inc_amount, out=out_location){
-  sample_num <- basename(sample) # Vector of sample names .fasta
+  
+  # Cut extension from filename
+  sample_num <- sub("([^.]+)\\.[[:alnum:]]+$", "\\1", basename(sample))
   
   #incProgress(amount = inc_amount,
   #            message = paste("Blasting ", sample_num, " against ", curr_db, sep = ""))#progressrelated

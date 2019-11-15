@@ -101,11 +101,11 @@ rna_23s <- function(org_id, samples){
   output_profile.df <- bind_rows(output_profile.df, values)
 
   writeLines("rRNA23S_pipeline() Completed...")
-  print(output_profile.df)
   write.csv(output_profile.df,
             paste(out_location, paste(Sys.Date(), org_id, "rRNA23S", "WADE.csv", sep = "_"), sep = ""),
             quote = FALSE,
             row.names = FALSE)
+  print(output_profile.df)
 }
 
 # ------------------ get_allele_fraction() ------------------

@@ -63,6 +63,11 @@ option_list = list(
               default=c(),
               help='samples to analyse (comma separated list of files)',
               metavar='character'),
+  make_option(c('-s2','--samples2'),
+              type='character',
+              default=c(),
+              help='VCF samples to analyse (comma separated list of files, only used for GONO/Labware)',
+              metavar='character'),
   make_option(c('-d','--outdir'),
               type='character',
               default=NA,
@@ -79,14 +84,21 @@ if (is.null(opt$samples)) {
 }
 
 samples <- unlist(strsplit(opt$samples, ','))
-
 samples <- samples %>% map(~ normalizePath(.x))
-
 samples <- samples %>% map_df(~ data.frame(fullpath = .x,
                              parent_dir = base::dirname(base::dirname(.x)),
                              subdir_id = base::basename(base::dirname(.x)),
                              filename = base::basename(.x),
                              type = 'file')) %>% 
+  mutate_if(is.factor, as.character)
+
+samples2 <- unlist(strsplit(opt$samples2, ','))
+samples2 <- samples2 %>% map(~ normalizePath(.x))
+samples2 <- samples2 %>% map_df(~ data.frame(fullpath = .x,
+                                           parent_dir = base::dirname(base::dirname(.x)),
+                                           subdir_id = base::basename(base::dirname(.x)),
+                                           filename = base::basename(.x),
+                                           type = 'file')) %>% 
   mutate_if(is.factor, as.character)
 
 
@@ -109,9 +121,9 @@ switch(test,
        rRNA23S = { rna_23s(org, samples)}, 
        AMR_LW = { 
          if (org == "GONO") {
-           labware_gono_amr(amrDF = database_pipeline(org, samples, VFDB = FALSE, stdout = TRUE), 
+           labware_gono_amr(amrDF = database_pipeline(org, samples, is_vfdb = FALSE, stdout = TRUE), 
                             ngstarDF = general_mlst_pipeline(org, samples, locus, seq_type = "NGSTAR"), 
-                            rnaDF = rna_23s(org, samples))
+                            rnaDF = rna_23s(org, samples2)) # RNA USES VCF FILES NOT FASTA!
          } else{ stop('Organism must be GONO for AMR_LW', call.=FALSE) }
         } 
        # Tested to here

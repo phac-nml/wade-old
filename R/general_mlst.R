@@ -62,6 +62,7 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
     allele <- ""
     allele_num <- ""
     
+    # Cut off file extension in table
     curr_sample_num <- sub("([^.]+)\\.[[:alnum:]]+$", "\\1", samples.df[i, "filename"])
     curr_file <- file.path(samples.df[i, "parent_dir"], samples.df[i, "subdir_id"], samples.df[i, "filename"])
     
@@ -267,6 +268,7 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
                 quote = FALSE,
                 row.names = FALSE)
       writeLines("--- profile_mlst.csv ---")
+      return(sample_out.df) # Files saved, why print?
       
     } else {
       
@@ -287,16 +289,19 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
                 paste(out_location, paste(Sys.Date(), org_id, "NGSTAR-mut", "WADE.csv", sep = "_"), sep = ""),
                 quote = FALSE,
                 row.names = FALSE)
+      return(sample_mut_out.df) # Files saved, why print?
+      
     } else if(seq_type == "NGMAST"){
       # --- NGMAST out
       write.csv(sample_out.df,
                 paste(out_location, paste(Sys.Date(), org_id, "NGMAST-profile", "WADE.csv", sep = "_"), sep = ""),
                 quote = FALSE,
                 row.names = FALSE)
+      return(sample_out.df) # Files saved, why print?
     }
 
     writeLines("DONE: general_mlst_pipeline()")
-    return(sample_out.df) # Files saved, why print?
+    
   }
 
 } # general_mlst_pipeline()
