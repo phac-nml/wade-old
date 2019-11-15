@@ -106,10 +106,13 @@ switch(test,
        MLST = { general_mlst_pipeline(org, samples, locus, test) },
        NGSTAR = { general_mlst_pipeline(org, samples, locus, test) },
        NGMAST = { general_mlst_pipeline(org, samples, locus, test) },
-       rRNA23S = { rna_23s(org, samples) } 
+       rRNA23S = { rna_23s(org, samples)}, 
+       AMR_LW = { 
+         labware_gono_amr(amrDF = database_pipeline(org, samples, VFDB = FALSE, stdout = TRUE), 
+                          ngstarDF = general_mlst_pipeline(org, samples, locus, seq_type = "NGSTAR"), 
+                          rnaDF = rna_23s(org, samples)) } 
        # Tested to here
        # SERO = { PneumoCaT_pipeline(samples) }, # Needs Samplenum issue (not sample list) addressed
        # MASTER = { master_blastr(org, test, samples, locus) },
-       # AMR_LW = { labware_gono_amr() }, # Not to include for first run through
        #{ master_blastr(org, test, samples, locus) }
 )
