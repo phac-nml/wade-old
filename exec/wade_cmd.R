@@ -108,9 +108,12 @@ switch(test,
        NGMAST = { general_mlst_pipeline(org, samples, locus, test) },
        rRNA23S = { rna_23s(org, samples)}, 
        AMR_LW = { 
-         labware_gono_amr(amrDF = database_pipeline(org, samples, VFDB = FALSE, stdout = TRUE), 
-                          ngstarDF = general_mlst_pipeline(org, samples, locus, seq_type = "NGSTAR"), 
-                          rnaDF = rna_23s(org, samples)) } 
+         if (org == "GONO") {
+           labware_gono_amr(amrDF = database_pipeline(org, samples, VFDB = FALSE, stdout = TRUE), 
+                            ngstarDF = general_mlst_pipeline(org, samples, locus, seq_type = "NGSTAR"), 
+                            rnaDF = rna_23s(org, samples))
+         } else{ stop('Organism must be GONO for AMR_LW', call.=FALSE) }
+        } 
        # Tested to here
        # SERO = { PneumoCaT_pipeline(samples) }, # Needs Samplenum issue (not sample list) addressed
        # MASTER = { master_blastr(org, test, samples, locus) },
