@@ -51,7 +51,7 @@ option_list = list(
               type='character',
               default=NULL,
               metavar='character',
-              callback=check_choose_from(choices = c('MLST','VIRULENCE','EMM','AMR_DB','VFDB','NGSTAR','rRNA23S','NGMAST')), # c('TOXINS','MLST','VIRULENCE','EMM','AMR_DB','VFDB','NGSTAR','rRNA23S','NGMAST')),
+              callback=check_choose_from(choices = c('MLST','VIRULENCE','EMM','AMR','VFDB','NGSTAR','rRNA23S','NGMAST')), # c('TOXINS','MLST','VIRULENCE','EMM','AMR_DB','VFDB','NGSTAR','rRNA23S','NGMAST')),
               help='test'),
   make_option(c('-l', '--locus'),
               type='character',
@@ -112,7 +112,7 @@ out_location <- if_else(is.na(opt$outdir),
 try(system(paste("mkdir", out_location)))
 
 switch(test,
-       AMR_DB = { database_pipeline(org, samples, FALSE) }, # 
+       AMR = { database_pipeline(org, samples, FALSE) }, # 
        VFDB = { database_pipeline(org, samples, TRUE) },
        EMM = { emm(org, samples, locus) },
        MLST = { general_mlst_pipeline(org, samples, locus, test) },

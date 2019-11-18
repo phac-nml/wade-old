@@ -32,7 +32,7 @@
 #' @return A table frame containing the results of the query
 #' @export
 
-master_blastr <- function(org_id, test_id, sample, locus_id = "list", sens="10e-50"){
+master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e-50"){
   # Variables ####
   Variable <- NA
   Blast_evalue <- sens            #sets sensitivity of Blast gene match 10e-50 to 10e-150; use 10e-5 for primers
@@ -41,16 +41,18 @@ master_blastr <- function(org_id, test_id, sample, locus_id = "list", sens="10e-
 
   # SampList <- here("data", "assemblies", "list.csv")
 
-  writeLines(paste("SampleNo \t", test_id, sep = ""))
+  # writeLines(paste("SampleNo \t", test_id, sep = ""))
 
-  if (org_id == "GONO" && (locus_id %in% c("penA", "mtrR", "porB", "ponA", "gyrA", "parC", "rRNA23S"))) {
-    test_id <- "NGSTAR"
-  }
+  # if (org_id == "GONO" && (locus_id %in% c("penA", "mtrR", "porB", "ponA", "gyrA", "parC", "rRNA23S"))) {
+  #   test_id <- "NGSTAR"
+  # }
 
   # Hardcoded Dir(s) ####
 
-  contigs_dir <- here("data", "databases", org_id, "assemblies") # Change depending on Organism!!
-  lookup_dir <- here("data", "databases", org_id, test_id)
+  #contigs_dir <- here("data", "databases", org_id, "assemblies") # Change depending on Organism!! Replaced with samples
+  
+  db_dir <- system.file("extdata/databases", package = "wade") # extdata/databases/curr_db/curr_db.fasta
+  lookup_dir <- paste(db_dir, org_id, test_id, sep = "/")  # Lookups
 
   # switch(org_id,
   #        GAS={
@@ -95,13 +97,14 @@ master_blastr <- function(org_id, test_id, sample, locus_id = "list", sens="10e-
   #------------------------------------------------------------------------------------------------------####
 
   # Hardcoded Dir(s) ####
-  unlink("C:\\WGS_Typing\\Output\\output_dna.fasta") #this deletes the file!
-  unlink("C:\\WGS_Typing\\Output\\output_dna_notfound.fasta")
-  unlink("C:\\WGS_Typing\\Output\\output_aa.fasta")
+  # unlink("C:\\WGS_Typing\\Output\\output_dna.fasta") #this deletes the file!
+  # unlink("C:\\WGS_Typing\\Output\\output_dna_notfound.fasta")
+  # unlink("C:\\WGS_Typing\\Output\\output_aa.fasta")
   # unlink("C:\\Temp\\Typing\\Output\\output_aa_notfound.fasta") #this deletes the file!
 
-  samples.df <- get_samples(org_id, sample_num)
+  samples.df <- samples
   print(samples.df)
+  
   # if(sample_num == "list") {
   #   samples.df <- read.csv(SampList, header = TRUE, sep = ",", stringsAsFactors = FALSE)
   # } else
@@ -122,12 +125,12 @@ master_blastr <- function(org_id, test_id, sample, locus_id = "list", sens="10e-
   }
 
   # Variables ####
-  num_loci <- (dim(loci.df))[1]
+  num_loci <- dim(loci.df)[1]
 
   # Progress ####
-  progress_ratio <- num_samples * num_loci
+  # progress_ratio <- num_samples * num_loci
 
-  if (test_id == "MASTER") {
+  if (test_id == "MASTER") { # Leaving this in but won't be using it.
     for(q in 1L:num_loci) {
 
       locus <- as.character(loci.df[q,1])
@@ -144,15 +147,12 @@ master_blastr <- function(org_id, test_id, sample, locus_id = "list", sens="10e-
   for (m in 1L:num_samples){ # Loop through the samples
 
     # Variables ####
-    writeLines("----------------")
-    print(samples.df)
-    writeLines("----------------")
     
-    
-    curr_sample_num <- as.character(samples.df[m, "SampleNo.filename"])
+    #curr_sample_num <- as.character(samples.df[m, "SampleNo.filename"])
+    curr_sample_num <- sub("([^.]+)\\.[[:alnum:]]+$", "\\1", samples.df[m, "filename"])
     print(curr_sample_num)
     curr_sample_var <-as.character(samples.df[m, "Variable"])
-    curr_sample.df <- filter(samples.df, SampleNo.filename == curr_sample_num)
+    curr_sample.df <- filter(samples.df, filename == samples.df[m, "filename"])
 
     sample_profile <- ""
 
@@ -186,8 +186,9 @@ master_blastr <- function(org_id, test_id, sample, locus_id = "list", sens="10e-
 
       #  .....................................................................BLAST and parse blastout.txt
 
-      query_file <- paste(contigs_dir, "/", curr_sample_num, ".fasta", sep = "")
-      db_dir <- here("data", "output", "temp", "queryfile.fasta") # "C:\\WGS_Typing\\temp\\queryfile.fasta" # Hardcoded Dir ####
+      query_file <- samples.df[m, "fullpath"] # Use fullpath instead of pasting names together
+      
+      db_dir <- paste(out_location, "queryfile.fasta", sep = "") # Temp file in outlocation
 
       if (!file.copy(query_file, db_dir, overwrite = T)) { # Can we copy the file? Should we copy the file?
 
@@ -203,8 +204,7 @@ master_blastr <- function(org_id, test_id, sample, locus_id = "list", sens="10e-
         try(system(command = format_command,
                    intern = TRUE))
 
-        blast_db_file <- paste(db_dir, "/", curr_sample_num, ".fasta", sep = "")
-        output_location <- paste(lookup_dir, "/temp/blastout.txt", sep = "")
+        output_location <- paste(out_location, "blastout.txt", sep = "")
 
         blast_command <- paste("blastn -query ", locus_file, " -db ", db_dir, " -out ", output_location, " -evalue ", Blast_evalue, sep = "")
         try(system(blast_command, intern = TRUE))
@@ -212,7 +212,7 @@ master_blastr <- function(org_id, test_id, sample, locus_id = "list", sens="10e-
         con <- file(output_location, open="r")
         linn <- readLines(con)
         close(con)
-        
+       
         #----- Removing Files -----
         file.remove(db_dir) # Remove the copied db_dir
         file.remove(output_location) # Remove the blast output since we've read it into linn
@@ -573,8 +573,8 @@ master_blastr <- function(org_id, test_id, sample, locus_id = "list", sens="10e-
       }
 
       cat(curr_sample_num, locus, AlleleInfo[1], AlleleInfo[2], AlleleInfo[3], AlleleInfo[4], IdLine, IDpercent2, "\n", sep = "\t")
-      incProgress(amount = 1/progress_ratio,
-                message = paste(curr_sample_num, "on", locus)) # Progress ####
+      # incProgress(amount = 1/progress_ratio,
+      #           message = paste(curr_sample_num, "on", locus)) # Progress ####
 
     } #end of locus list loop
 
@@ -594,8 +594,8 @@ master_blastr <- function(org_id, test_id, sample, locus_id = "list", sens="10e-
 
   } #close brack for sample list loop
 
-  outfile <- paste(here("data", "input", "labware"), "/output_profile_", org_id, "_", test_id, ".csv", sep = "")
-
+  outfile <- paste(out_location, "output_profile_", org_id, "_", test_id, ".csv", sep = "")
+  
   writeLines(paste("Writing to: ", outfile))
   write.csv(OutputProfile.df, outfile, row.names = F)
 
@@ -613,5 +613,4 @@ master_blastr <- function(org_id, test_id, sample, locus_id = "list", sens="10e-
 
   # Return ####
   return(OutputProfile.df)
-
 }
