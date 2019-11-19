@@ -92,14 +92,16 @@ samples <- samples %>% map_df(~ data.frame(fullpath = .x,
                              type = 'file')) %>% 
   mutate_if(is.factor, as.character)
 
-samples2 <- unlist(strsplit(opt$samples2, ','))
-samples2 <- samples2 %>% map(~ normalizePath(.x))
-samples2 <- samples2 %>% map_df(~ data.frame(fullpath = .x,
+if (!is.null(samples2)){
+  samples2 <- unlist(strsplit(opt$samples2, ','))
+  samples2 <- samples2 %>% map(~ normalizePath(.x))
+  samples2 <- samples2 %>% map_df(~ data.frame(fullpath = .x,
                                            parent_dir = base::dirname(base::dirname(.x)),
                                            subdir_id = base::basename(base::dirname(.x)),
                                            filename = base::basename(.x),
                                            type = 'file')) %>% 
-  mutate_if(is.factor, as.character)
+    mutate_if(is.factor, as.character)
+}
 
 
 test <- opt$test
