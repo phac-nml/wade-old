@@ -37,6 +37,7 @@ master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e
   # Variables ####
   Variable <- NA
   Blast_evalue <- sens            #sets sensitivity of Blast gene match 10e-50 to 10e-150; use 10e-5 for primers
+  if (test_id == "MASTER") {test_id <- "AMR"}
 
   #--------------------------------------------------------------------------------------------------------
 
@@ -128,21 +129,18 @@ master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e
   # Variables ####
   num_loci <- dim(loci.df)[1]
 
-  # Progress ####
-  # progress_ratio <- num_samples * num_loci
-
-  if (test_id == "MASTER") { # Leaving this in but won't be using it.
-    for(q in 1L:num_loci) {
-
-      locus <- as.character(loci.df[q,1])
-      locus_dna_lookup <- paste(lookup_dir, "/allele_lkup_dna/", locus, ".fasta", sep = "")
-
-      if(file.exists(locus_dna_lookup)) {
-        blast_format_command <- paste("makeblastdb -in ", locus_dna_lookup, " -dbtype nucl", sep = "")
-        try(system(blast_format_command))
-      }
-    }
-  }
+  # if (test_id == "MASTER") { # Leaving this in but won't be using it
+  #   for(q in 1L:num_loci) {
+  # 
+  #     locus <- as.character(loci.df[q,1])
+  #     locus_dna_lookup <- paste(lookup_dir, "/allele_lkup_dna/", locus, ".fasta", sep = "")
+  # 
+  #     if(file.exists(locus_dna_lookup)) {
+  #       blast_format_command <- paste("makeblastdb -in ", locus_dna_lookup, " -dbtype nucl", sep = "")
+  #       try(system(blast_format_command))
+  #     }
+  #   }
+  # }
 
   # Iteration ####
   for (m in 1L:num_samples){ # Loop through the samples
@@ -156,7 +154,7 @@ master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e
     sample_profile <- ""
     
     query_file <- samples.df[m, "fullpath"] # Use fullpath instead of pasting names together
-    db_dir <- paste(out_location, "/queryfile.fasta", sep = "") # Temp file in outlocation
+    db_dir <- paste(out_location, "queryfile.fasta", sep = "") # Temp file in outlocation
     
     if(file.copy(query_file, db_dir, overwrite = T)){
       filecopied <- TRUE
@@ -608,14 +606,14 @@ master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e
             quote = FALSE,
             row.names = FALSE)
 
-  #----------------------------------------------------------------Make LABWARE UPLOAD FILES
-  if ((org_id=="GAS") & (test_id=="AMR") & (num_loci > 1)) {
-    OutputProfile.df <- labware_gas_amr()
-  }
-
-  if (org_id == "GAS" & (test_id=="TOXINS" & num_loci > 1)) {
-    OutputProfile.df <- labware_gas_toxins()
-  }
+  #----------------------------------------------------------------Make LABWARE UPLOAD FILES - Nope.
+  # if ((org_id=="GAS") & (test_id=="AMR") & (num_loci > 1)) {
+  #   OutputProfile.df <- labware_gas_amr()
+  # }
+  # 
+  # if (org_id == "GAS" & (test_id=="TOXINS" & num_loci > 1)) {
+  #   OutputProfile.df <- labware_gas_toxins()
+  # }
   #----------------------------------------------------------------Make LABWARE UPLOAD FILES
   # Output ####
   writeLines("DONE: MasterBlastR finished....")
