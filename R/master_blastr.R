@@ -188,7 +188,7 @@ master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e
 
       query_file <- samples.df[m, "fullpath"] # Use fullpath instead of pasting names together
       
-      db_dir <- paste(out_location, "queryfile.fasta", sep = "") # Temp file in outlocation
+      db_dir <- paste(out_location, "/queryfile.fasta", sep = "") # Temp file in outlocation
 
       if (!file.copy(query_file, db_dir, overwrite = T)) { # Can we copy the file? Should we copy the file?
 
@@ -200,11 +200,11 @@ master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e
         IDpercent2 <- ""
 
       } else { #make blast database of contig file, then blast locus against it
-        format_command <- paste("makeblastdb -in ", db_dir, " -dbtype nucl", sep = "")
+        format_command <- paste("makeblastdb -in ", db_dir, " -dbtype nucl", sep = "") # CAN THIS BE MOVED OUTSIDE OF THE LOCUS LOOP?
         try(system(command = format_command,
                    intern = TRUE))
 
-        output_location <- paste(out_location, "blastout.txt", sep = "")
+        output_location <- paste(out_location, "/blastout.txt", sep = "")
 
         blast_command <- paste("blastn -query ", locus_file, " -db ", db_dir, " -out ", output_location, " -evalue ", Blast_evalue, sep = "")
         try(system(blast_command, intern = TRUE))
@@ -434,7 +434,9 @@ master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e
           # parse out the allele numbers
 
 
-          Seq_File <- paste(lookup_dir, "/temp/querygene.fasta", sep = "") # "C:\\WGS_Typing\\temp\\querygene.fasta" # Hardcoded Dir ####
+          Seq_File <- paste(out_location, "/querygene.fasta", sep = "") # "C:\\WGS_Typing\\temp\\querygene.fasta" # Hardcoded Dir ####
+          
+          
           sink(Seq_File, split=FALSE, append = FALSE)
           cat(">", curr_sample_num, "_", locus , "\n", DNASeqLine_NoDash_str, sep ="")
           sink()
@@ -445,7 +447,7 @@ master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e
 
             #BLAST lookup table
             # Hardcoded Dir ####
-            output_location <- paste(lookup_dir, "/temp/blastout2.txt", sep = "")
+            output_location <- paste(out_location, "/blastout2.txt", sep = "")
 
             BlastCommand2 <- paste("blastn -query ", Seq_File, " -db ", locus_dna_lookup, " -out ", output_location, " -evalue 10e-85 -num_alignments 1", sep = "")
             try(system(BlastCommand2, intern = TRUE))
@@ -488,21 +490,21 @@ master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e
 
 
           #-------------------------------------------write a fasta file of all sequences output_dna.fasta and output_aa.fasta
-          sink(file = here("data", "output_dna.fasta"),
+          sink(file = paste(out_location, "/output_dna.fasta", sep = ""),
                split = FALSE,
                append = TRUE)
           cat(">", locus, "_", curr_sample_num, "_", locus, AlleleInfo[2], "_", AlleleInfo[3], "_", curr_sample_var, "\n", DNASeqLine_NoDash_str, "\n", sep ="")
           sink()
 
           if (AlleleInfo[2] == "NF") {
-            sink(file = here("data", "output_dna_notfound.fasta"),
+            sink(file = paste(out_location, "/output_dna_notfound.fasta", sep = ""),
                  split = FALSE,
                  append = TRUE)
             cat(">", locus, "_", curr_sample_num, "_", locus, AlleleInfo[3], "_", curr_sample_var, "\n", DNASeqLine_NoDash_str, "\n", sep ="")
             sink()
           }
 
-          sink(file = here("data", "output_aa.fasta"),
+          sink(file = paste(out_location, "/output_aa.fasta", sep = ""),
                split = FALSE,
                append = TRUE)
           cat(">", locus, "_", curr_sample_num, "_", curr_sample_var, "\n", AASeqLine_str, "\n", sep ="")
@@ -594,7 +596,7 @@ master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e
 
   } #close brack for sample list loop
 
-  outfile <- paste(out_location, "output_profile_", org_id, "_", test_id, ".csv", sep = "")
+  outfile <- paste(out_location, "/output_profile_", org_id, "_", test_id, ".csv", sep = "")
   
   writeLines(paste("Writing to: ", outfile))
   write.csv(OutputProfile.df, outfile, row.names = F)
