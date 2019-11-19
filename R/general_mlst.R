@@ -18,6 +18,10 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
     stop('General MLST seq_type must be one of MLST, NGMAST, or NGSTAR', call.=FALSE)
   }
 
+  if (seq_type %in% c("NGMAST", "NGSTAR") & org_id != "GONO") {
+    stop('NGMAST and NGSTAR are GONO only tests', call.=FALSE)
+  }
+  
   # ------------- Directories ----------------
   db_dir <- system.file("extdata/databases", package = "wade") # extdata/databases/curr_db/curr_db.fasta
   lookup_dir <- paste(db_dir, org_id, seq_type, "allele_lkup_dna", sep = "/")  # Lookups
@@ -274,11 +278,6 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
     } else {
       
       write.csv(sample_out.df,
-                paste(out_location, paste(Sys.Date(), org_id, "LabwareUpload", "WADE.csv", sep = "_"), sep = ""),
-                quote = FALSE,
-                row.names = FALSE)
-      
-      write.csv(sample_out.df,
                 paste(out_location, paste(Sys.Date(), org_id, "MLST-profile", "WADE.csv", sep = "_"), sep = ""),
                 quote = FALSE,
                 row.names = FALSE)
@@ -290,7 +289,7 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
                 paste(out_location, paste(Sys.Date(), org_id, "NGSTAR-mut", "WADE.csv", sep = "_"), sep = ""),
                 quote = FALSE,
                 row.names = FALSE)
-      return(sample_mut_out.df) # Files saved, why print?
+      #return(sample_mut_out.df) # Files saved, why print?
       
     } else if(seq_type == "NGMAST"){
       # --- NGMAST out
@@ -298,7 +297,7 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
                 paste(out_location, paste(Sys.Date(), org_id, "NGMAST-profile", "WADE.csv", sep = "_"), sep = ""),
                 quote = FALSE,
                 row.names = FALSE)
-      return(sample_out.df) # Files saved, why print?
+      #return(sample_out.df) # Files saved, why print?
     }
 
     
