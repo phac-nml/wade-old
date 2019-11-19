@@ -52,7 +52,11 @@ database_pipeline <- function(org_id, samples.df, is_vfdb, stdout=FALSE){
             file = outfile,
             row.names = FALSE)
   
+  
+  writeLines(paste("Removing temporary blast files. ", list.files(out_location, "_blast_out.tsv$", full.names = F)))
+  file.remove(list.files(out_location, "_blast_out.tsv$", full.names = T))
   writeLines("DONE: database_pipeline() finished...")
+  
   if(stdout){output.df}
 }
 
@@ -111,5 +115,6 @@ execute_blastout <- function(curr_db, sample, inc_amount, out=out_location){
   } else {
     curr_blast_table.df <- data.frame()
   }
-  curr_blast_table.df
+  
+    curr_blast_table.df
 }
