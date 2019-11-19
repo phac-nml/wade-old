@@ -107,20 +107,15 @@ emm <- function(org_id, samples.df, locus){
   # A row will have an error when there is a sample that does not exist
   output.df <- filter(output.df, Type != error) # Filter out the rows that contain errors
 
-  if(num_samples == 1){
-    write_emm_output(write_blast = TRUE, blastout.df, output.df, org_id)
-    return(blastout.df)
-  } else {
-    write_emm_output(write_blast = FALSE, blastout.df, output.df, org_id)
-    return(output.df)
-  }
+  write_emm_output(blastout.df, output.df, org_id)
+  
 } # end function call
 
 # ------------------------------------
 # write_emm_output()
 #
 # create .csv's based on the given parameters
-write_emm_output <- function(write_blast, blast.df, sample.df, org_id, out=out_location){
+write_emm_output <- function(blast.df, sample.df, org_id, out=out_location){
   
   # Multiple output files
   writeLines(paste("Writing output to", out))
@@ -128,13 +123,14 @@ write_emm_output <- function(write_blast, blast.df, sample.df, org_id, out=out_l
   emm_blast_file <- paste(out, paste(Sys.Date(), org_id, "emmBLAST", "WADE.csv", sep = "_"), sep = "")
   emm_file <- paste(out, paste(Sys.Date(), org_id, "emm", "WADE.csv", sep = "_"), sep = "")
   
-  if(write_blast){ # We only write the blast when there is one file
-     write.csv(blast.df, emm_blast_file, row.names = FALSE)
-  } # else { # Otherwise just write E V E R Y T H I N G
-  #   write.csv(sample.df, emm_file, row.names = FALSE)
-  # }
-  
-  write.csv(sample.df, emm_file, quote = FALSE, row.names = FALSE)
+  write.csv(blast.df, 
+            emm_blast_file, 
+            quote = FALSE, 
+            row.names = FALSE)
+  write.csv(sample.df, 
+            emm_file, 
+            quote = FALSE, 
+            row.names = FALSE)
   
   writeLines("DONE: EMM_pipeline()")
 }
