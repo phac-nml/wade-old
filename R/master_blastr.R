@@ -495,21 +495,21 @@ master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e
 
 
           #-------------------------------------------write a fasta file of all sequences output_dna.fasta and output_aa.fasta
-          sink(file = paste(out_location, "/output_dna.fasta", sep = ""),
+          sink(file = paste(out_location, paste(Sys.Date(), "master-output-dna", org_id, test_id, "WADE.fasta", sep = "_"), sep = ""),
                split = FALSE,
                append = TRUE)
           cat(">", locus, "_", curr_sample_num, "_", locus, AlleleInfo[2], "_", AlleleInfo[3], "_", curr_sample_var, "\n", DNASeqLine_NoDash_str, "\n", sep ="")
           sink()
 
           if (AlleleInfo[2] == "NF") {
-            sink(file = paste(out_location, "/output_dna_notfound.fasta", sep = ""),
+            sink(file = paste(out_location, paste(Sys.Date(), "master-output-dna-notfound", org_id, test_id, "WADE.fasta", sep = "_"), sep = ""),
                  split = FALSE,
                  append = TRUE)
             cat(">", locus, "_", curr_sample_num, "_", locus, AlleleInfo[3], "_", curr_sample_var, "\n", DNASeqLine_NoDash_str, "\n", sep ="")
             sink()
           }
 
-          sink(file = paste(out_location, "/output_aa.fasta", sep = ""),
+          sink(file = paste(out_location, paste(Sys.Date(), "master-output-aa", org_id, test_id, "WADE.fasta", sep = "_"), sep = ""),
                split = FALSE,
                append = TRUE)
           cat(">", locus, "_", curr_sample_num, "_", curr_sample_var, "\n", AASeqLine_str, "\n", sep ="")
@@ -602,10 +602,10 @@ master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e
     file.remove(list.files(dirname(db_dir), "^query", full.names = T))
   } #close brack for sample list loop
 
-  outfile <- paste(out_location, "/output_profile_", org_id, "_", test_id, ".csv", sep = "")
-  
-  writeLines(paste("Writing to: ", outfile))
-  write.csv(OutputProfile.df, outfile, row.names = F)
+  write.csv(OutputProfile.df,
+            paste(out_location, paste(Sys.Date(), "master-output-profile", org_id, test_id, "WADE.csv", sep = "_"), sep = ""),
+            quote = FALSE,
+            row.names = FALSE)
 
   #----------------------------------------------------------------Make LABWARE UPLOAD FILES
   if ((org_id=="GAS") & (test_id=="AMR") & (num_loci > 1)) {
