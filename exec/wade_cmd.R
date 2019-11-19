@@ -1,4 +1,4 @@
-sink(stdout(), type = 'output')
+sink(stdout(), type = 'message')
 
 suppressPackageStartupMessages({
   library(optparse)
@@ -8,6 +8,8 @@ suppressPackageStartupMessages({
   library(here)
   library(stringr)
 })
+
+suppressWarnings(library(Biostrings))
 
 #source(normalizePath('R/sourcetesting.R'))
 
@@ -61,12 +63,12 @@ option_list = list(
   make_option(c('-s','--samples'),
               type='character',
               default=c(),
-              help='samples to analyse (comma separated list of files)',
+              help='samples to analyse (comma separated list of files, no spaces)',
               metavar='character'),
   make_option(c('-S','--samples2'),
               type='character',
               default=c(),
-              help='VCF samples to analyse (comma separated list of files, only used for GONO/Labware)',
+              help='VCF samples to analyse (comma separated list of files, no spaces: only used for GONO/Labware)',
               metavar='character'),
   make_option(c('-d','--outdir'),
               type='character',
@@ -75,13 +77,15 @@ option_list = list(
               metavar='character')
 )
 
-opt_parser = OptionParser(option_list=option_list)
-opt = parse_args(opt_parser)
+opt_parser  <-  OptionParser(option_list=option_list)
+opt <-  parse_args(opt_parser)
 print(opt) # TESTING ONLY
 if (is.null(opt$samples)) {
   print_help(opt_parser)
   stop('Samples is a required argument', call.=FALSE)
 }
+
+print(opt$samples)
 
 samples <- unlist(strsplit(opt$samples, ','))
 samples <- samples %>% map(~ normalizePath(.x))
@@ -92,7 +96,7 @@ samples <- samples %>% map_df(~ data.frame(fullpath = .x,
                              type = 'file')) %>% 
   mutate_if(is.factor, as.character)
 
-if (!is.null(samples2)){
+if (!is.null(opt$samples2)){
   samples2 <- unlist(strsplit(opt$samples2, ','))
   samples2 <- samples2 %>% map(~ normalizePath(.x))
   samples2 <- samples2 %>% map_df(~ data.frame(fullpath = .x,
