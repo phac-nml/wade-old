@@ -190,11 +190,6 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
       }
     } # End Locus Loop ####
     
-    #------ REMOVE FILES -------
-    # We remove these files after our looping
-    file.remove(blast_out_file) # Delete the blast file
-    file.remove(dest_file) # Delete the copied .fasta
-    
     if(locus == "list"){
       # ----------- lookup profiles
       profiles_copy.df <- data.frame(profiles.df)
@@ -244,6 +239,17 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
     sample_out.df$ST <- paste("porB-", sample_out.df$porB, sep = "")
   }
   
+  #------ REMOVE FILES -------
+  # We remove these files after our looping
+  # writeLines(paste("Removing", blast_out_file))
+  # file.remove(blast_out_file) # Delete the blast file
+  # writeLines(paste("Removing", dest_file))
+  # file.remove(dest_file) # Delete the copied .fasta
+  writeLines(paste("Removing temporary blast files. ", list.files(out_location, "_blast_out.tsv$", full.names = F)))
+  file.remove(list.files(out_location, "_blast_out.tsv$", full.names = T))
+  file.remove(dest_file)
+  writeLines("DONE: general_mlst_pipeline()")
+  
   if(num_loci == 1){ # If we only used one loci - Not in first Galaxy iteration
     out_file <- paste(out_location, paste(Sys.Date(), org_id, "MLST-blast", "WADE.csv", sep = "_"), sep = "")
     write.csv(blast_out.df, out_file, row.names = FALSE)
@@ -253,22 +259,17 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
     
   } else {
     
+    
     # ---------------- File Output ----------------
     print(sample_out.df)
     if(seq_type == "MLST"){
       # --- MLST out
-      # These write the exact same things with different names...
-      
-      write.csv(sample_out.df,
-                paste(out_location, paste(Sys.Date(), org_id, "MLST", "WADE.csv", sep = "_"), sep = ""),
-                quote = FALSE,  row.names = FALSE)
-      
       write.csv(sample_out.df,
                 paste(out_location, paste(Sys.Date(), org_id, "MLST-profile", "WADE.csv", sep = "_"), sep = ""),
                 quote = FALSE,
                 row.names = FALSE)
       writeLines("--- profile_mlst.csv ---")
-      return(sample_out.df) # Files saved, why print?
+      return(sample_out.df) 
       
     } else {
       
@@ -300,7 +301,7 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
       return(sample_out.df) # Files saved, why print?
     }
 
-    writeLines("DONE: general_mlst_pipeline()")
+    
     
   }
 
