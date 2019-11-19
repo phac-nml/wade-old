@@ -1,7 +1,7 @@
 #' emm typing pipeline from WGS assemblies
 #'
 #' Takes Organism, Sample Number, Locus, and a Variable at queries a contig.fasta file
-#' @param org_id Organism to query: GAS, PNEUMO or GONO
+#' @param org_id Organism to query: GAS
 #' @param samples.df Data frame of user selected samples and the sample paths
 #' @param locus Sample number associated with contig.fasta file
 #' @importFrom dplyr filter bind_rows

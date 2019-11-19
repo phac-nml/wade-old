@@ -7,7 +7,7 @@
 emm(org_id, samples.df, locus)
 }
 \arguments{
-\item{org_id}{Organism to query: GAS, PNEUMO or GONO}
+\item{org_id}{Organism to query: GAS}
 
 \item{samples.df}{Data frame of user selected samples and the sample paths}
 

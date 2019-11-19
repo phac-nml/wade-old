@@ -63,7 +63,7 @@ option_list = list(
               default=c(),
               help='samples to analyse (comma separated list of files)',
               metavar='character'),
-  make_option(c('-s2','--samples2'),
+  make_option(c('-S','--samples2'),
               type='character',
               default=c(),
               help='VCF samples to analyse (comma separated list of files, only used for GONO/Labware)',
