@@ -105,9 +105,7 @@ samples2 <- samples2 %>% map_df(~ data.frame(fullpath = .x,
 test <- opt$test
 org <- opt$organism
 locus <- opt$locus
-out_location <- if_else(is.na(opt$outdir), 
-                        here("output/"),
-                        suppressWarnings(normalizePath(opt$outdir))) # Throws warnings for some reason. Seems like if_else() evaluates all code within it even if the logical dictates otherwise
+out_location <- paste(if(is.na(opt$outdir)){ here("output")} else{normalizePath(opt$outdir)}, "/", sep="")
 
 try(system(paste("mkdir", out_location)))
 

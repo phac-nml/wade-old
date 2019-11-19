@@ -147,15 +147,25 @@ master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e
   for (m in 1L:num_samples){ # Loop through the samples
 
     # Variables ####
-    
     #curr_sample_num <- as.character(samples.df[m, "SampleNo.filename"])
     curr_sample_num <- sub("([^.]+)\\.[[:alnum:]]+$", "\\1", samples.df[m, "filename"])
     print(curr_sample_num)
     curr_sample_var <-as.character(samples.df[m, "Variable"])
     curr_sample.df <- filter(samples.df, filename == samples.df[m, "filename"])
-
     sample_profile <- ""
-
+    
+    query_file <- samples.df[m, "fullpath"] # Use fullpath instead of pasting names together
+    db_dir <- paste(out_location, "/queryfile.fasta", sep = "") # Temp file in outlocation
+    
+    if(file.copy(query_file, db_dir, overwrite = T)){
+      filecopied <- TRUE
+      # Make blast database of contig file
+      format_command <- paste("makeblastdb -in ", db_dir, " -dbtype nucl", sep = "") # CAN THIS BE MOVED OUTSIDE OF THE LOCUS LOOP?
+      try(system(command = format_command,
+                 intern = TRUE))
+      }
+    
+    
     for(p in 1L:num_loci) { # Loop through the loci
 
       locus <- as.character(loci.df[p,1])
@@ -186,11 +196,8 @@ master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e
 
       #  .....................................................................BLAST and parse blastout.txt
 
-      query_file <- samples.df[m, "fullpath"] # Use fullpath instead of pasting names together
-      
-      db_dir <- paste(out_location, "/queryfile.fasta", sep = "") # Temp file in outlocation
 
-      if (!file.copy(query_file, db_dir, overwrite = T)) { # Can we copy the file? Should we copy the file?
+      if (!filecopied) { # Replace this copy file with a marker whether the 
 
         AlleleInfo[1] <- "Sample_Err"
         AlleleInfo[2] <- NA
@@ -198,14 +205,12 @@ master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e
         AlleleInfo[4] <- NA
         IdLine <- ""
         IDpercent2 <- ""
+        next()
 
-      } else { #make blast database of contig file, then blast locus against it
-        format_command <- paste("makeblastdb -in ", db_dir, " -dbtype nucl", sep = "") # CAN THIS BE MOVED OUTSIDE OF THE LOCUS LOOP?
-        try(system(command = format_command,
-                   intern = TRUE))
-
+      }
+        
+        # BLAST current locus against contig DB
         output_location <- paste(out_location, "/blastout.txt", sep = "")
-
         blast_command <- paste("blastn -query ", locus_file, " -db ", db_dir, " -out ", output_location, " -evalue ", Blast_evalue, sep = "")
         try(system(blast_command, intern = TRUE))
 
@@ -214,7 +219,6 @@ master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e
         close(con)
        
         #----- Removing Files -----
-        file.remove(db_dir) # Remove the copied db_dir
         file.remove(output_location) # Remove the blast output since we've read it into linn
 
         #check if gene was found in BLAST
@@ -456,6 +460,7 @@ master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e
             linn <- readLines(con)
             close(con)
 
+            file.remove(output_location) # Remove the blast output since we've read it into linn
             #parse blastout2
             for (i in 1:length(linn)) {
 
@@ -523,7 +528,7 @@ master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e
           IdLine <-""
           IDpercent2 <- ""
         }
-      } #close bracket for contig file found.
+      #} #close bracket for contig file found.
 
       col1_name <- paste(locus, "_result", sep = "")
       col2_name <- paste(locus, "_allele", sep = "")
@@ -594,6 +599,7 @@ master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e
 
     #incProgress(amount = 1/num_samples) # PROGRESS ####
 
+    file.remove(list.files(dirname(db_dir), "^query", full.names = T))
   } #close brack for sample list loop
 
   outfile <- paste(out_location, "/output_profile_", org_id, "_", test_id, ".csv", sep = "")
