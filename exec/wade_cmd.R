@@ -1,4 +1,5 @@
-sink(stdout(), type = 'message')
+sink(tempfile())
+options(warn = -1)
 
 suppressPackageStartupMessages({
   library(optparse)
@@ -9,10 +10,7 @@ suppressPackageStartupMessages({
   library(stringr)
 })
 
-suppressWarnings(library(Biostrings))
-
-#source(normalizePath('R/sourcetesting.R'))
-
+suppressPackageStartupMessages(library(Biostrings))
 
 #' Check if value matches a pre-defined list of values
 check_choose_from <- function(choices) {
