@@ -8,14 +8,16 @@
 `%notin%` <- Negate(`%in%`)
 
 
-# .onAttach <- function(libname, pkgname) {
-#   packageStartupMessage("Welcome to WADE")
-# }
+.onAttach <- function(libname, pkgname) {
+  options(warn = -1)
+  #packageStartupMessage("Welcome to WADE")
+}
 
 
 
 # On load create global variables:
 .onLoad <- function(libname, pkgname){
+  
   utils::globalVariables(c("out_location", 
                            "Locus_id",
                            "Type",

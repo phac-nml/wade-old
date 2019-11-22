@@ -144,7 +144,7 @@ switch(test,
        NGSTAR = { general_mlst_pipeline(org, samples, locus, test) },
        NGMAST = { general_mlst_pipeline(org, samples, locus, test) },
        rRNA23S = { rna_23s(org, samples)}, 
-       MASTER = { mbcaller(org, test, samples, locus) } # Runs appropriate tests to the organism: "AMR","TOXINS","VIRULENCE","NGMAST","NGSTAR"
+       MASTER = { wade:::mbcaller(org, test, samples, locus) } # Runs appropriate tests to the organism: "AMR","TOXINS","VIRULENCE","NGMAST","NGSTAR"
        # Tested to here
        # AMR_LW = { 
        #   if (org == "GONO") {
