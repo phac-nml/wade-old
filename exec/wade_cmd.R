@@ -10,6 +10,8 @@ suppressPackageStartupMessages({
   library(stringr)
 })
 
+`%notin%` <- Negate(`%in%`)
+
 suppressPackageStartupMessages(library(Biostrings))
 
 #' Check if value matches a pre-defined list of values
@@ -83,10 +85,27 @@ option_list = list(
 opt_parser  <-  OptionParser(option_list=option_list)
 opt <-  parse_args(opt_parser)
 print(opt) # TESTING ONLY
-if (is.null(opt$samples)) {
+
+# Check for required arguments
+if (is.null(opt$samples) | is.null(opt$organism) | is.null(opt$test)) {
   print_help(opt_parser)
-  stop('Samples is a required argument', call.=FALSE)
+  stop('Samples, Test, and Organism are required arguments', call.=TRUE)
 }
+
+
+gastests <- c("AMR", "EMM", "MLST", "MASTER", "VFDB")
+gonotests <- c("rRNA23S", "AMR", "MASTER", "MLST", "NGMAST","NGSTAR", "VFDB")
+pneumotests <- c("rRNA23S", "AMR", "MASTER", "MLST", "VFDB")
+
+
+switch(opt$organism,
+       GAS={if(opt$test %notin% gastests){stop(paste('Organism/Test incorrect. GAS tests are:', paste(gastests, collapse = ' ')), call.=TRUE)}},
+       
+       GONO={if(opt$test %notin% gonotests){stop(paste('Organism/Test incorrect. GONO tests are:', paste(gonotests, collapse = ' ')), call.=TRUE)}},
+       
+       PNEUMO={if(opt$test %notin% pneumotests){stop(paste('Organism/Test incorrect. PNEUMO tests are:', paste(pneumotests, collapse = ' ')), call.=TRUE)}}
+)
+
 
 samples <- unlist(strsplit(opt$samples, ','))
 samples <- samples %>% map(~ normalizePath(.x))
@@ -125,7 +144,7 @@ switch(test,
        NGSTAR = { general_mlst_pipeline(org, samples, locus, test) },
        NGMAST = { general_mlst_pipeline(org, samples, locus, test) },
        rRNA23S = { rna_23s(org, samples)}, 
-       MASTER = { master_blastr(org, test, samples, locus) } # Runs only AMR on any of the 3 orgs. Need further dev to allow other tests (eg. TOXINS works in test env, others unknown)
+       MASTER = { mbcaller(org, test, samples, locus) } # Runs appropriate tests to the organism: "AMR","TOXINS","VIRULENCE","NGMAST","NGSTAR"
        # Tested to here
        # AMR_LW = { 
        #   if (org == "GONO") {

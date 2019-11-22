@@ -23,7 +23,10 @@
                            "Mismatches",
                            "Gaps",
                            "Align",
-                           "Allele2"))
+                           "Allele2",
+                           "gastests",
+                           "gonotests",
+                           "pneumotests"))
 }
 
 

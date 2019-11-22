@@ -37,8 +37,7 @@ master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e
   # Variables ####
   Variable <- NA
   Blast_evalue <- sens            #sets sensitivity of Blast gene match 10e-50 to 10e-150; use 10e-5 for primers
-  if (test_id == "MASTER") {test_id <- "AMR"}
-
+  print(test_id)
   #--------------------------------------------------------------------------------------------------------
 
   # SampList <- here("data", "assemblies", "list.csv")
@@ -56,46 +55,6 @@ master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e
   db_dir <- system.file("extdata/databases", package = "wade") # extdata/databases/curr_db/curr_db.fasta
   lookup_dir <- paste(db_dir, org_id, test_id, sep = "/")  # Lookups
 
-  # switch(org_id,
-  #        GAS={
-  #          contigs_dir <- "W:\\Projects\\Project_GC_WalterD\\MiSeq\\Streptococcus\\GAS\\contigs\\"
-  #
-  #          switch(test_id,
-  #                 AMR={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GAS\\Wamr_R\\"},
-  #                 TOXINS={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GAS\\Toxins_R\\"},
-  #                 VIRULENCE={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GAS\\Virulence_R\\"},
-  #                 MASTER={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GAS\\Master_BlastR\\"}
-  #          )
-  #
-  #        },
-  #
-  #        PNEUMO={
-  #          contigs_dir <- "W:\\Projects\\Project_GC_WalterD\\MiSeq\\Streptococcus\\Pneumo\\contigs\\"
-  #
-  #          switch(test_id,
-  #                 AMR={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\PNEUMO\\Wamr_R\\"},
-  #                 TOXINS={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\PNEUMO\\Toxins_R\\"},
-  #                 VIRULENCE={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\PNEUMO\\Virulence_R\\"},
-  #                 MASTER={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\PNEUMO\\Master_Blaster_R\\"}
-  #          )
-  #        },
-  #
-  #        GONO={
-  #          contigs_dir <- "W:\\Projects\\Project_GC_WalterD\\MiSeq\\Gonorrhoea\\contigs\\"
-  #
-  #          switch(test_id,
-  #                 AMR={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GONO\\Wamr_R\\"},  #but use NGSTAR databases for penA, etc
-  #                 AMR_LW={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GONO\\Wamr_R\\"},  #but use NGSTAR databases for penA, etc
-  #
-  #                 NGMAST={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GONO\\NGMAST_R\\"},
-  #                 MASTER={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GONO\\Master_Blaster_R\\"},
-  #                 NGSTAR={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GONO\\NGSTAR_R\\"}
-  #
-  #          )
-  #        }
-  #
-  # )
-
   #------------------------------------------------------------------------------------------------------####
 
   # Hardcoded Dir(s) ####
@@ -105,7 +64,7 @@ master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e
   # unlink("C:\\Temp\\Typing\\Output\\output_aa_notfound.fasta") #this deletes the file!
 
   samples.df <- samples
-  print(samples.df)
+  
   
   # if(sample_num == "list") {
   #   samples.df <- read.csv(SampList, header = TRUE, sep = ",", stringsAsFactors = FALSE)
@@ -621,3 +580,58 @@ master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e
   # Return ####
   return(OutputProfile.df)
 }
+
+mbcaller <- function(org_id, test_id, samples, locus_id = "list", sens="10e-50"){
+  # Calls master blaster for all organism specific tests if test_id is MASTER otherwise just passes the function call (eg. use in R not via CL)
+  
+  if (test_id == "MASTER"){
+    switch(org_id,
+         GAS={tests <- c("AMR","TOXINS","VIRULENCE")},
+         GONO={tests <- c("AMR","NGMAST","NGSTAR")},
+         PNEUMO={tests <- c("AMR","VIRULENCE")}
+         )
+    walk(tests, ~ master_blastr(org_id, .x, samples, locus_id, sens))
+  }else{
+    master_blastr(org_id, test_id, samples, locus_id, sens)
+  }
+}
+
+# switch(org_id,
+#        GAS={
+#          contigs_dir <- "W:\\Projects\\Project_GC_WalterD\\MiSeq\\Streptococcus\\GAS\\contigs\\"
+#
+#          switch(test_id,
+#                 AMR={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GAS\\Wamr_R\\"},
+#                 TOXINS={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GAS\\Toxins_R\\"},
+#                 VIRULENCE={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GAS\\Virulence_R\\"},
+#                 MASTER={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GAS\\Master_BlastR\\"}
+#          )
+#
+#        },
+#
+#        PNEUMO={
+#          contigs_dir <- "W:\\Projects\\Project_GC_WalterD\\MiSeq\\Streptococcus\\Pneumo\\contigs\\"
+#
+#          switch(test_id,
+#                 AMR={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\PNEUMO\\Wamr_R\\"},
+#                 TOXINS={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\PNEUMO\\Toxins_R\\"},
+#                 VIRULENCE={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\PNEUMO\\Virulence_R\\"},
+#                 MASTER={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\PNEUMO\\Master_Blaster_R\\"}
+#          )
+#        },
+#
+#        GONO={
+#          contigs_dir <- "W:\\Projects\\Project_GC_WalterD\\MiSeq\\Gonorrhoea\\contigs\\"
+#
+#          switch(test_id,
+#                 AMR={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GONO\\Wamr_R\\"},  #but use NGSTAR databases for penA, etc
+#                 AMR_LW={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GONO\\Wamr_R\\"},  #but use NGSTAR databases for penA, etc
+#
+#                 NGMAST={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GONO\\NGMAST_R\\"},
+#                 MASTER={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GONO\\Master_Blaster_R\\"},
+#                 NGSTAR={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GONO\\NGSTAR_R\\"}
+#
+#          )
+#        }
+#
+# )
