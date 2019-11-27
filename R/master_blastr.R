@@ -545,7 +545,7 @@ master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e
 
     sample_profile.df <- data.frame(SampleProfile = sample_profile)
     cat("Molecular Profile:  ", sample_profile, "\n\n", sep = "")
-    OutputLocus1.df <- bind_cols(curr_sample.df, OutputLocus.df, sample_profile.df)
+    OutputLocus1.df <- bind_cols(curr_sample.df$filename, OutputLocus.df, sample_profile.df)
 
     if(m == 1) {  #if first sample make one row profile table, otherwise add new row to table
       OutputProfile.df <- data.frame(OutputLocus1.df)
