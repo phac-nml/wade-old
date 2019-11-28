@@ -255,7 +255,7 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
   writeLines("DONE: general_mlst_pipeline()")
   
   if(num_loci == 1){ # If we only used one loci - Not in first Galaxy iteration
-    out_file <- paste(out_location, paste(Sys.Date(), org_id, "MLST-blast", "WADE.csv", sep = "_"), sep = "")
+    out_file <- paste(out_location, paste(org_id, "MLST-blast", "WADE.csv", sep = "_"), sep = "")
     write.csv(blast_out.df, out_file, row.names = FALSE)
     writeLines("DONE: general_mlst_pipeline()")
     
@@ -269,7 +269,7 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
     if(seq_type == "MLST"){
       # --- MLST out
       write.csv(sample_out.df,
-                paste(out_location, paste(Sys.Date(), org_id, "MLST-profile", "WADE.csv", sep = "_"), sep = ""),
+                paste(out_location, paste(org_id, "MLST-profile", "WADE.csv", sep = "_"), sep = ""),
                 quote = FALSE,
                 row.names = FALSE)
       writeLines("--- profile_mlst.csv ---")
@@ -278,7 +278,7 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
     } else {
       
       write.csv(sample_out.df,
-                paste(out_location, paste(Sys.Date(), org_id, "MLST-profile", "WADE.csv", sep = "_"), sep = ""),
+                paste(out_location, paste(org_id, "MLST-profile", "WADE.csv", sep = "_"), sep = ""),
                 quote = FALSE,
                 row.names = FALSE)
     }
@@ -286,7 +286,7 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
     if(seq_type == "NGSTAR"){
       
       write.csv(sample_mut_out.df,
-                paste(out_location, paste(Sys.Date(), org_id, "NGSTAR-mut", "WADE.csv", sep = "_"), sep = ""),
+                paste(out_location, paste(org_id, "NGSTAR-mut", "WADE.csv", sep = "_"), sep = ""),
                 quote = FALSE,
                 row.names = FALSE)
       #return(sample_mut_out.df) # Files saved, why print?
@@ -294,7 +294,7 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
     } else if(seq_type == "NGMAST"){
       # --- NGMAST out
       write.csv(sample_out.df,
-                paste(out_location, paste(Sys.Date(), org_id, "NGMAST-profile", "WADE.csv", sep = "_"), sep = ""),
+                paste(out_location, paste(org_id, "NGMAST-profile", "WADE.csv", sep = "_"), sep = ""),
                 quote = FALSE,
                 row.names = FALSE)
       #return(sample_out.df) # Files saved, why print?

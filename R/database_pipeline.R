@@ -46,7 +46,7 @@ database_pipeline <- function(org_id, samples.df, is_vfdb, stdout=FALSE){
   output.df <- map2_df(db_samples.df[,"db"], db_samples.df[,"sample"], ~ execute_blastout(.x, .y, inc_amount)) %>%
     select("SampleNo", "DataBase", "GeneID", "MatchID") # Just rearranging the columns here
   
-  outfile <- paste(out_location, paste(Sys.Date(), org_id, "dbpipeline", "WADE.csv", sep = "_"), sep = "")
+  outfile <- paste(out_location, paste(org_id, "dbpipeline", "WADE.csv", sep = "_"), sep = "")
   writeLines(paste("Writing output to", outfile))
   write.csv(x = output.df,
             file = outfile,

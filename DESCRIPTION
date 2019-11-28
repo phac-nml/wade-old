@@ -1,6 +1,6 @@
 Package: wade
 Title: Executes molecular typing on contig assemblies
-Version: 0.2.3
+Version: 0.2.4
 Authors@R: c(person("Adrian", "Zetner", email = "adrian.zetner@canada.ca", role = c("aut", "cre")),
               person("Walter", "Demczuk", email = "walter.demczuk@canada.ca", role = c("aut")),
               person("Justin", "Band", email = "justin.band@canada.ca", role = c("aut")))

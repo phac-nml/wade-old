@@ -120,8 +120,8 @@ write_emm_output <- function(blast.df, sample.df, org_id, out=out_location){
   # Multiple output files
   writeLines(paste("Writing output to", out))
   
-  emm_blast_file <- paste(out, paste(Sys.Date(), org_id, "emmBLAST", "WADE.csv", sep = "_"), sep = "")
-  emm_file <- paste(out, paste(Sys.Date(), org_id, "emm", "WADE.csv", sep = "_"), sep = "")
+  emm_blast_file <- paste(out, paste(org_id, "emmBLAST", "WADE.csv", sep = "_"), sep = "")
+  emm_file <- paste(out, paste(org_id, "emm", "WADE.csv", sep = "_"), sep = "")
   
   write.csv(blast.df, 
             emm_blast_file, 

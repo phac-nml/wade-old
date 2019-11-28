@@ -707,7 +707,7 @@ labware_gono_amr <- function(amrDF, ngstarDF, rnaDF) {
   # Output ####
   write.csv(x = lw_Output.df,
             #here("data", "input", "labware", "LabWareUpload_GONO_AMR.csv"),
-            paste(out_location, paste(Sys.Date(), "LabwareGONOAMR", "WADE.csv", sep = "_"), sep = ""),
+            paste(out_location, paste("LabwareGONOAMR", "WADE.csv", sep = "_"), sep = ""),
             quote = FALSE,
             row.names = FALSE)
 

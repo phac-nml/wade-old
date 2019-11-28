@@ -102,7 +102,7 @@ rna_23s <- function(org_id, samples){
 
   writeLines("rRNA23S_pipeline() Completed...")
   write.csv(output_profile.df,
-            paste(out_location, paste(Sys.Date(), org_id, "rRNA23S", "WADE.csv", sep = "_"), sep = ""),
+            paste(out_location, paste(org_id, "rRNA23S", "WADE.csv", sep = "_"), sep = ""),
             quote = FALSE,
             row.names = FALSE)
   print(output_profile.df)

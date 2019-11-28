@@ -453,21 +453,21 @@ master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e
 
 
           #-------------------------------------------write a fasta file of all sequences output_dna.fasta and output_aa.fasta
-          sink(file = paste(out_location, paste(Sys.Date(), "master-output-dna", org_id, test_id, "WADE.fasta", sep = "_"), sep = ""),
+          sink(file = paste(out_location, paste(org_id, "master-output-dna", test_id, "WADE.fasta", sep = "_"), sep = ""),
                split = FALSE,
                append = TRUE)
           cat(">", locus, "_", curr_sample_num, "_", locus, AlleleInfo[2], "_", AlleleInfo[3], "_", curr_sample_var, "\n", DNASeqLine_NoDash_str, "\n", sep ="")
           sink()
 
           if (AlleleInfo[2] == "NF") {
-            sink(file = paste(out_location, paste(Sys.Date(), "master-output-dna-notfound", org_id, test_id, "WADE.fasta", sep = "_"), sep = ""),
+            sink(file = paste(out_location, paste(org_id, "master-output-dna-notfound", test_id, "WADE.fasta", sep = "_"), sep = ""),
                  split = FALSE,
                  append = TRUE)
             cat(">", locus, "_", curr_sample_num, "_", locus, AlleleInfo[3], "_", curr_sample_var, "\n", DNASeqLine_NoDash_str, "\n", sep ="")
             sink()
           }
 
-          sink(file = paste(out_location, paste(Sys.Date(), "master-output-aa", org_id, test_id, "WADE.fasta", sep = "_"), sep = ""),
+          sink(file = paste(out_location, paste(org_id, "master-output-aa", test_id, "WADE.fasta", sep = "_"), sep = ""),
                split = FALSE,
                append = TRUE)
           cat(">", locus, "_", curr_sample_num, "_", curr_sample_var, "\n", AASeqLine_str, "\n", sep ="")
@@ -561,7 +561,7 @@ master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e
   } #close brack for sample list loop
 
   write.csv(OutputProfile.df,
-            paste(out_location, paste(Sys.Date(), "master-output-profile", org_id, test_id, "WADE.csv", sep = "_"), sep = ""),
+            paste(out_location, paste(org_id, "master-output-profile", test_id, "WADE.csv", sep = "_"), sep = ""),
             quote = FALSE,
             row.names = FALSE)
 
