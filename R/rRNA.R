@@ -76,7 +76,7 @@ rna_23s <- function(org_id, samples){
   #vcf_paths <- samples.df["filename"] %>% map(~ file.path(vcf_folder, replace_file_ext(.x, ".vcf")))
   
   #vcf_files.df <- unlist(vcf_paths) %>% map_df(~ read_vcf(.x)) # read the .vcf's and return a df
-  vcf_files.df <- samples["fullpath"] %>% map_df(~ read_vcf(.x))
+  vcf_files.df <- samples$fullpath %>% map_df(~ read_vcf(.x))
 
   # ------------------ Query Data Frames ------------------
   values <- map(1:nrow(vcf_files.df), function(x){ # Go through the rows of A SINGLE df
