@@ -84,7 +84,7 @@ option_list = list(
 
 opt_parser  <-  OptionParser(option_list=option_list)
 opt <-  parse_args(opt_parser)
-print(opt) # TESTING ONLY
+# print(opt) # TESTING ONLY
 
 # Check for required arguments
 if (is.null(opt$samples) | is.null(opt$organism) | is.null(opt$test)) {
