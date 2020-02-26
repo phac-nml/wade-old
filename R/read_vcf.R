@@ -6,6 +6,8 @@
 #'
 #' @param path The path to file corresponding .vcf file
 #' @return A Data Frame of the data from a .vcf
+#' @importFrom stringr str_remove str_split
+#' @import utils
 #'
 
 read_vcf <- function(path){
@@ -13,28 +15,21 @@ read_vcf <- function(path){
 
   if(file.exists(path)){
 
-    curr_file <- file(path, open = "r") # open the file
-    file_lines <- readLines(curr_file) # read the lines
+    # Read Header####
+    file_lines <- readLines(path) # read the lines
     header_str <- file_lines[grep("#CHROM", file_lines)] # Get the header line
-
     header <- str_split(header_str, '\t') # convert the header to a list
-    close(curr_file)
 
     # Read Table ####
-    curr_file <- file(path, open = "r") # open the file
-    in_file.df <- read.table(file = curr_file,
+    in_file.df <- read.table(file = path,
                              comment.char = "#",
                              stringsAsFactors = FALSE,
                              colClasses = "character")
-    close(curr_file)
-
-    names(in_file.df) <- as.list(header[[1]]) # name the columns
+    names(in_file.df) <- header[[1]] # name the columns
     in_file.df$SampleNo <- str_remove(basename(path), ".vcf") # Assign a new column tracking the sample number it's from
-    typeof(in_file.df$SampleNo)
+    
     # Return ####
     in_file.df
 
-  } else {
-    data.frame() # Return an empty data frame
-  }
+  } 
 }

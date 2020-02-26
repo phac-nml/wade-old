@@ -4,14 +4,14 @@
 \alias{emm}
 \title{emm typing pipeline from WGS assemblies}
 \usage{
-emm(org_id, sample_num, locus)
+emm(org_id, samples.df, locus)
 }
 \arguments{
+\item{org_id}{Organism to query: GAS}
+
+\item{samples.df}{Data frame of user selected samples and the sample paths}
+
 \item{locus}{Sample number associated with contig.fasta file}
-
-\item{Org_id}{Organism to query: GAS, PNEUMO or GONO}
-
-\item{SampleNo}{Sample number associated with contig.fasta file}
 }
 \value{
 A table frame containing the results of the query

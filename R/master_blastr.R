@@ -25,79 +25,47 @@
 #' cpA, fctA, fctB, lepA and srtC1 all pilin proteins - use only fctA (major pilin protein)
 #' fbp54, grab, ideS_mac, mf_spd, speB, scpA, ska always positive?
 #' hasA,B,C are the same operon, use only hasA
+#' @importFrom dplyr filter bind_cols
+#' @importFrom stringr str_detect str_length str_replace_all str_sub
+#' @import Biostrings
+#' @import here
+#' @import utils
 #' @return A table frame containing the results of the query
 #' @export
 
-master_blastr <- function(org_id, test_id, sample_num, locus_id){
+master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e-50"){
   # Variables ####
   Variable <- NA
-  Blast_evalue <- "10e-50"            #sets sensitivity of Blast gene match 10e-50 to 10e-150; use 10e-5 for primers
-
+  Blast_evalue <- sens            #sets sensitivity of Blast gene match 10e-50 to 10e-150; use 10e-5 for primers
+  print(test_id)
   #--------------------------------------------------------------------------------------------------------
 
-  SampList <- here("data", "assemblies", "list.csv")
+  # SampList <- here("data", "assemblies", "list.csv")
 
-  writeLines(paste("SampleNo \t", test_id, sep = ""))
+  # writeLines(paste("SampleNo \t", test_id, sep = ""))
 
-  if (org_id == "GONO" && (locus_id %in% c("penA", "mtrR", "porB", "ponA", "gyrA", "parC", "rRNA23S"))) {
-    test_id <- "NGSTAR"
-  }
+  # if (org_id == "GONO" && (locus_id %in% c("penA", "mtrR", "porB", "ponA", "gyrA", "parC", "rRNA23S"))) {
+  #   test_id <- "NGSTAR"
+  # }
 
   # Hardcoded Dir(s) ####
 
-  contigs_dir <- here("data", "databases", org_id, "assemblies") # Change depending on Organism!!
-  lookup_dir <- here("data", "databases", org_id, test_id)
-
-  # switch(org_id,
-  #        GAS={
-  #          contigs_dir <- "W:\\Projects\\Project_GC_WalterD\\MiSeq\\Streptococcus\\GAS\\contigs\\"
-  #
-  #          switch(test_id,
-  #                 AMR={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GAS\\Wamr_R\\"},
-  #                 TOXINS={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GAS\\Toxins_R\\"},
-  #                 VIRULENCE={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GAS\\Virulence_R\\"},
-  #                 MASTER={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GAS\\Master_BlastR\\"}
-  #          )
-  #
-  #        },
-  #
-  #        PNEUMO={
-  #          contigs_dir <- "W:\\Projects\\Project_GC_WalterD\\MiSeq\\Streptococcus\\Pneumo\\contigs\\"
-  #
-  #          switch(test_id,
-  #                 AMR={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\PNEUMO\\Wamr_R\\"},
-  #                 TOXINS={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\PNEUMO\\Toxins_R\\"},
-  #                 VIRULENCE={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\PNEUMO\\Virulence_R\\"},
-  #                 MASTER={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\PNEUMO\\Master_Blaster_R\\"}
-  #          )
-  #        },
-  #
-  #        GONO={
-  #          contigs_dir <- "W:\\Projects\\Project_GC_WalterD\\MiSeq\\Gonorrhoea\\contigs\\"
-  #
-  #          switch(test_id,
-  #                 AMR={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GONO\\Wamr_R\\"},  #but use NGSTAR databases for penA, etc
-  #                 AMR_LW={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GONO\\Wamr_R\\"},  #but use NGSTAR databases for penA, etc
-  #
-  #                 NGMAST={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GONO\\NGMAST_R\\"},
-  #                 MASTER={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GONO\\Master_Blaster_R\\"},
-  #                 NGSTAR={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GONO\\NGSTAR_R\\"}
-  #
-  #          )
-  #        }
-  #
-  # )
+  #contigs_dir <- here("data", "databases", org_id, "assemblies") # Change depending on Organism!! Replaced with samples
+  
+  db_dir <- system.file("extdata/databases", package = "wade") # extdata/databases/curr_db/curr_db.fasta
+  lookup_dir <- paste(db_dir, org_id, test_id, sep = "/")  # Lookups
 
   #------------------------------------------------------------------------------------------------------####
 
   # Hardcoded Dir(s) ####
-  unlink("C:\\WGS_Typing\\Output\\output_dna.fasta") #this deletes the file!
-  unlink("C:\\WGS_Typing\\Output\\output_dna_notfound.fasta")
-  unlink("C:\\WGS_Typing\\Output\\output_aa.fasta")
+  # unlink("C:\\WGS_Typing\\Output\\output_dna.fasta") #this deletes the file!
+  # unlink("C:\\WGS_Typing\\Output\\output_dna_notfound.fasta")
+  # unlink("C:\\WGS_Typing\\Output\\output_aa.fasta")
   # unlink("C:\\Temp\\Typing\\Output\\output_aa_notfound.fasta") #this deletes the file!
 
-  samples.df <- get_samples(org_id, sample_num)
-  print(samples.df)
+  samples.df <- samples
+  
+  
   # if(sample_num == "list") {
   #   samples.df <- read.csv(SampList, header = TRUE, sep = ",", stringsAsFactors = FALSE)
   # } else
@@ -118,40 +86,44 @@ master_blastr <- function(org_id, test_id, sample_num, locus_id){
   }
 
   # Variables ####
-  num_loci <- (dim(loci.df))[1]
+  num_loci <- dim(loci.df)[1]
 
-  # Progress ####
-  progress_ratio <- num_samples * num_loci
-
-  if (test_id == "MASTER") {
-    for(q in 1L:num_loci) {
-
-      locus <- as.character(loci.df[q,1])
-      locus_dna_lookup <- paste(lookup_dir, "/allele_lkup_dna/", locus, ".fasta", sep = "")
-
-      if(file.exists(locus_dna_lookup)) {
-        blast_format_command <- paste("makeblastdb -in ", locus_dna_lookup, " -dbtype nucl", sep = "")
-        try(system(blast_format_command))
-      }
-    }
-  }
+  # if (test_id == "MASTER") { # Leaving this in but won't be using it
+  #   for(q in 1L:num_loci) {
+  # 
+  #     locus <- as.character(loci.df[q,1])
+  #     locus_dna_lookup <- paste(lookup_dir, "/allele_lkup_dna/", locus, ".fasta", sep = "")
+  # 
+  #     if(file.exists(locus_dna_lookup)) {
+  #       blast_format_command <- paste("makeblastdb -in ", locus_dna_lookup, " -dbtype nucl", sep = "")
+  #       try(system(blast_format_command))
+  #     }
+  #   }
+  # }
 
   # Iteration ####
   for (m in 1L:num_samples){ # Loop through the samples
 
     # Variables ####
-    writeLines("----------------")
-    print(samples.df)
-    writeLines("----------------")
-    
-    
-    curr_sample_num <- as.character(samples.df[m, "SampleNo.filename"])
+    #curr_sample_num <- as.character(samples.df[m, "SampleNo.filename"])
+    curr_sample_num <- sub("([^.]+)\\.[[:alnum:]]+$", "\\1", samples.df[m, "filename"])
     print(curr_sample_num)
     curr_sample_var <-as.character(samples.df[m, "Variable"])
-    curr_sample.df <- filter(samples.df, SampleNo.filename == curr_sample_num)
-
+    curr_sample.df <- filter(samples.df, filename == samples.df[m, "filename"])
     sample_profile <- ""
-
+    
+    query_file <- samples.df[m, "fullpath"] # Use fullpath instead of pasting names together
+    db_dir <- paste(out_location, "queryfile.fasta", sep = "") # Temp file in outlocation
+    
+    if(file.copy(query_file, db_dir, overwrite = T)){
+      filecopied <- TRUE
+      # Make blast database of contig file
+      format_command <- paste("makeblastdb -in ", db_dir, " -dbtype nucl", sep = "") # CAN THIS BE MOVED OUTSIDE OF THE LOCUS LOOP?
+      try(system(command = format_command,
+                 intern = TRUE))
+      }
+    
+    
     for(p in 1L:num_loci) { # Loop through the loci
 
       locus <- as.character(loci.df[p,1])
@@ -182,10 +154,8 @@ master_blastr <- function(org_id, test_id, sample_num, locus_id){
 
       #  .....................................................................BLAST and parse blastout.txt
 
-      query_file <- paste(contigs_dir, "/", curr_sample_num, ".fasta", sep = "")
-      db_dir <- here("data", "output", "temp", "queryfile.fasta") # "C:\\WGS_Typing\\temp\\queryfile.fasta" # Hardcoded Dir ####
 
-      if (!file.copy(query_file, db_dir, overwrite = T)) { # Can we copy the file? Should we copy the file?
+      if (!filecopied) { # Replace this copy file with a marker whether the 
 
         AlleleInfo[1] <- "Sample_Err"
         AlleleInfo[2] <- NA
@@ -193,24 +163,20 @@ master_blastr <- function(org_id, test_id, sample_num, locus_id){
         AlleleInfo[4] <- NA
         IdLine <- ""
         IDpercent2 <- ""
+        next()
 
-      } else { #make blast database of contig file, then blast locus against it
-        format_command <- paste("makeblastdb -in ", db_dir, " -dbtype nucl", sep = "")
-        try(system(command = format_command,
-                   intern = TRUE))
-
-        blast_db_file <- paste(db_dir, "/", curr_sample_num, ".fasta", sep = "")
-        output_location <- paste(lookup_dir, "/temp/blastout.txt", sep = "")
-
+      }
+        
+        # BLAST current locus against contig DB
+        output_location <- paste(out_location, "/blastout.txt", sep = "")
         blast_command <- paste("blastn -query ", locus_file, " -db ", db_dir, " -out ", output_location, " -evalue ", Blast_evalue, sep = "")
         try(system(blast_command, intern = TRUE))
 
         con <- file(output_location, open="r")
         linn <- readLines(con)
         close(con)
-        
+       
         #----- Removing Files -----
-        file.remove(db_dir) # Remove the copied db_dir
         file.remove(output_location) # Remove the blast output since we've read it into linn
 
         #check if gene was found in BLAST
@@ -259,13 +225,13 @@ master_blastr <- function(org_id, test_id, sample_num, locus_id){
             if (TimesThrough == 1) {
               if (str_detect(linn[i], "Identities")) {
                 IdLine <-  unlist(linn[i])
-                #IdLine <- " Identities = 2431/2460 (99%), Gaps = 0/2460 (0%)"
                 IdLine <- substr(IdLine, 15, 50)
                 IdLineParts <- strsplit(IdLine, "/")
                 IDLineParts2 <- unlist(IdLineParts)
                 IDlength <- as.numeric(IDLineParts2[1])
                 IDcoverage <- ((IDlength / WTlength) * 100)
                 IDpercent <- sprintf("%3.1f%%", IDcoverage)
+                IdLine <- str_split(IdLine, ",", simplify = T)[1]
               }
 
               if (str_detect(linn[i], "Query ")) {
@@ -430,7 +396,9 @@ master_blastr <- function(org_id, test_id, sample_num, locus_id){
           # parse out the allele numbers
 
 
-          Seq_File <- paste(lookup_dir, "/temp/querygene.fasta", sep = "") # "C:\\WGS_Typing\\temp\\querygene.fasta" # Hardcoded Dir ####
+          Seq_File <- paste(out_location, "/querygene.fasta", sep = "") # "C:\\WGS_Typing\\temp\\querygene.fasta" # Hardcoded Dir ####
+          
+          
           sink(Seq_File, split=FALSE, append = FALSE)
           cat(">", curr_sample_num, "_", locus , "\n", DNASeqLine_NoDash_str, sep ="")
           sink()
@@ -441,7 +409,7 @@ master_blastr <- function(org_id, test_id, sample_num, locus_id){
 
             #BLAST lookup table
             # Hardcoded Dir ####
-            output_location <- paste(lookup_dir, "/temp/blastout2.txt", sep = "")
+            output_location <- paste(out_location, "/blastout2.txt", sep = "")
 
             BlastCommand2 <- paste("blastn -query ", Seq_File, " -db ", locus_dna_lookup, " -out ", output_location, " -evalue 10e-85 -num_alignments 1", sep = "")
             try(system(BlastCommand2, intern = TRUE))
@@ -450,6 +418,7 @@ master_blastr <- function(org_id, test_id, sample_num, locus_id){
             linn <- readLines(con)
             close(con)
 
+            file.remove(output_location) # Remove the blast output since we've read it into linn
             #parse blastout2
             for (i in 1:length(linn)) {
 
@@ -484,21 +453,21 @@ master_blastr <- function(org_id, test_id, sample_num, locus_id){
 
 
           #-------------------------------------------write a fasta file of all sequences output_dna.fasta and output_aa.fasta
-          sink(file = here("data", "output_dna.fasta"),
+          sink(file = paste(out_location, paste(org_id, "master-output-dna", test_id, "WADE.fasta", sep = "_"), sep = ""),
                split = FALSE,
                append = TRUE)
           cat(">", locus, "_", curr_sample_num, "_", locus, AlleleInfo[2], "_", AlleleInfo[3], "_", curr_sample_var, "\n", DNASeqLine_NoDash_str, "\n", sep ="")
           sink()
 
           if (AlleleInfo[2] == "NF") {
-            sink(file = here("data", "output_dna_notfound.fasta"),
+            sink(file = paste(out_location, paste(org_id, "master-output-dna-notfound", test_id, "WADE.fasta", sep = "_"), sep = ""),
                  split = FALSE,
                  append = TRUE)
             cat(">", locus, "_", curr_sample_num, "_", locus, AlleleInfo[3], "_", curr_sample_var, "\n", DNASeqLine_NoDash_str, "\n", sep ="")
             sink()
           }
 
-          sink(file = here("data", "output_aa.fasta"),
+          sink(file = paste(out_location, paste(org_id, "master-output-aa", test_id, "WADE.fasta", sep = "_"), sep = ""),
                split = FALSE,
                append = TRUE)
           cat(">", locus, "_", curr_sample_num, "_", curr_sample_var, "\n", AASeqLine_str, "\n", sep ="")
@@ -517,7 +486,7 @@ master_blastr <- function(org_id, test_id, sample_num, locus_id){
           IdLine <-""
           IDpercent2 <- ""
         }
-      } #close bracket for contig file found.
+      #} #close bracket for contig file found.
 
       col1_name <- paste(locus, "_result", sep = "")
       col2_name <- paste(locus, "_allele", sep = "")
@@ -567,16 +536,16 @@ master_blastr <- function(org_id, test_id, sample_num, locus_id){
           sample_profile <- paste(sample_profile, ProfileEntry, sep = "")
         }
       }
-
+# HERE
       cat(curr_sample_num, locus, AlleleInfo[1], AlleleInfo[2], AlleleInfo[3], AlleleInfo[4], IdLine, IDpercent2, "\n", sep = "\t")
-      incProgress(amount = 1/progress_ratio,
-                message = paste(curr_sample_num, "on", locus)) # Progress ####
+      # incProgress(amount = 1/progress_ratio,
+      #           message = paste(curr_sample_num, "on", locus)) # Progress ####
 
     } #end of locus list loop
 
     sample_profile.df <- data.frame(SampleProfile = sample_profile)
     cat("Molecular Profile:  ", sample_profile, "\n\n", sep = "")
-    OutputLocus1.df <- bind_cols(curr_sample.df, OutputLocus.df, sample_profile.df)
+    OutputLocus1.df <- bind_cols(curr_sample.df['filename', drop = F], OutputLocus.df, sample_profile.df)
 
     if(m == 1) {  #if first sample make one row profile table, otherwise add new row to table
       OutputProfile.df <- data.frame(OutputLocus1.df)
@@ -588,26 +557,81 @@ master_blastr <- function(org_id, test_id, sample_num, locus_id){
 
     #incProgress(amount = 1/num_samples) # PROGRESS ####
 
+    file.remove(list.files(dirname(db_dir), "^query", full.names = T))
   } #close brack for sample list loop
 
-  outfile <- paste(here("data", "input", "labware"), "/output_profile_", org_id, "_", test_id, ".csv", sep = "")
+  write.csv(OutputProfile.df,
+            paste(out_location, paste(org_id, "master-output-profile", test_id, "WADE.csv", sep = "_"), sep = ""),
+            quote = FALSE,
+            row.names = FALSE)
 
-  writeLines(paste("Writing to: ", outfile))
-  write.csv(OutputProfile.df, outfile, row.names = F)
-
-  #----------------------------------------------------------------Make LABWARE UPLOAD FILES
-  if ((org_id=="GAS") & (test_id=="AMR") & (num_loci > 1)) {
-    OutputProfile.df <- labware_gas_amr()
-  }
-
-  if (org_id == "GAS" & (test_id=="TOXINS" & num_loci > 1)) {
-    OutputProfile.df <- labware_gas_toxins()
-  }
+  #----------------------------------------------------------------Make LABWARE UPLOAD FILES - Nope.
+  # if ((org_id=="GAS") & (test_id=="AMR") & (num_loci > 1)) {
+  #   OutputProfile.df <- labware_gas_amr()
+  # }
+  # 
+  # if (org_id == "GAS" & (test_id=="TOXINS" & num_loci > 1)) {
+  #   OutputProfile.df <- labware_gas_toxins()
+  # }
   #----------------------------------------------------------------Make LABWARE UPLOAD FILES
   # Output ####
   writeLines("DONE: MasterBlastR finished....")
 
   # Return ####
   return(OutputProfile.df)
-
 }
+
+mbcaller <- function(org_id, test_id, samples, locus_id = "list", sens="10e-50"){
+  # Calls master blaster for all organism specific tests if test_id is MASTER otherwise just passes the function call (eg. use in R not via CL)
+  
+  if (test_id == "MASTER"){
+    switch(org_id,
+         GAS={tests <- c("AMR","TOXINS","VIRULENCE")},
+         GONO={tests <- c("AMR","NGMAST","NGSTAR")},
+         PNEUMO={tests <- c("AMR","VIRULENCE")}
+         )
+    walk(tests, ~ master_blastr(org_id, .x, samples, locus_id, sens))
+  }else{
+    master_blastr(org_id, test_id, samples, locus_id, sens)
+  }
+}
+
+# switch(org_id,
+#        GAS={
+#          contigs_dir <- "W:\\Projects\\Project_GC_WalterD\\MiSeq\\Streptococcus\\GAS\\contigs\\"
+#
+#          switch(test_id,
+#                 AMR={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GAS\\Wamr_R\\"},
+#                 TOXINS={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GAS\\Toxins_R\\"},
+#                 VIRULENCE={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GAS\\Virulence_R\\"},
+#                 MASTER={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GAS\\Master_BlastR\\"}
+#          )
+#
+#        },
+#
+#        PNEUMO={
+#          contigs_dir <- "W:\\Projects\\Project_GC_WalterD\\MiSeq\\Streptococcus\\Pneumo\\contigs\\"
+#
+#          switch(test_id,
+#                 AMR={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\PNEUMO\\Wamr_R\\"},
+#                 TOXINS={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\PNEUMO\\Toxins_R\\"},
+#                 VIRULENCE={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\PNEUMO\\Virulence_R\\"},
+#                 MASTER={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\PNEUMO\\Master_Blaster_R\\"}
+#          )
+#        },
+#
+#        GONO={
+#          contigs_dir <- "W:\\Projects\\Project_GC_WalterD\\MiSeq\\Gonorrhoea\\contigs\\"
+#
+#          switch(test_id,
+#                 AMR={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GONO\\Wamr_R\\"},  #but use NGSTAR databases for penA, etc
+#                 AMR_LW={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GONO\\Wamr_R\\"},  #but use NGSTAR databases for penA, etc
+#
+#                 NGMAST={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GONO\\NGMAST_R\\"},
+#                 MASTER={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GONO\\Master_Blaster_R\\"},
+#                 NGSTAR={lookup_dir <- "L:\\GC_PAHO\\Whole_Genome_Sequencing\\WGS_Typing\\GONO\\NGSTAR_R\\"}
+#
+#          )
+#        }
+#
+# )

@@ -1,10 +1,16 @@
 #' rRNA.R
 #'
 #' @param org_id Organism to query: GAS, PNEUMO or GONO
-#' @param samples.df Data frame of user selected samples and the sample paths
+#' @param samples Data frame of user selected samples and the sample paths
 #' 
 #' @return A data frame containing the results of the query
 #' 
+#' @importFrom dplyr bind_rows
+#' @importFrom purrr is_empty map_df map
+#' @importFrom stringr str_remove str_split
+#' @import here
+#' @import utils
+#' @import magrittr
 #' @details
 #' 23S rRNA pipeline for WGS assemblies to determine number of mutated alleles
 #'
@@ -12,7 +18,6 @@
 #'
 #' GONO:
 #' Run SNP core pipeline with NCCP11945_23S4.fasta file: A2045G or C2597T
-
 #' PNEUMO:
 #' Run SNP core pipeline with 23S_R6.fasta file: A2061G or C2613T
 #'
@@ -35,10 +40,11 @@
 #'
 #' @export
 
-rna_23s <- function(org_id, samples.df){
+rna_23s <- function(org_id, samples){
   # ------------------ Organism Variables ------------------
-  rna_dir <- here("data/databases", org_id, "23S_rRNA")
-  vcf_folder <- paste(rna_dir, "/VCF", sep = "")
+  rna_dir <- system.file(paste("extdata/databases", org_id, "23S_rRNA", sep = "/"), package = "wade") # extdata/databases/curr_db/curr_db.fasta
+  
+  # vcf_folder <- paste(rna_dir, "/VCF", sep = "")
 
   switch(org_id,
          GONO = {
@@ -56,6 +62,9 @@ rna_23s <- function(org_id, samples.df){
                                          POS = 2061)
            rRNA23S_pos2.df <- data.frame(CHROM = chrom,
                                          POS = 2613)
+         },
+         {
+           stop("Organism must be one of GONO or PNEUMO")
          }
   )
 
@@ -64,9 +73,10 @@ rna_23s <- function(org_id, samples.df){
 
   # Get a list of sample.vcf
   #   We replace the extension and then append the location of where the file should exist
-  vcf_paths <- samples.df["filename"] %>% map(~ file.path(vcf_folder, replace_file_ext(.x, ".vcf")))
+  #vcf_paths <- samples.df["filename"] %>% map(~ file.path(vcf_folder, replace_file_ext(.x, ".vcf")))
   
-  vcf_files.df <- unlist(vcf_paths) %>% map_df(~ read_vcf(.x)) # read the .vcf's and return a df
+  #vcf_files.df <- unlist(vcf_paths) %>% map_df(~ read_vcf(.x)) # read the .vcf's and return a df
+  vcf_files.df <- samples$fullpath %>% map_df(~ read_vcf(.x))
 
   # ------------------ Query Data Frames ------------------
   values <- map(1:nrow(vcf_files.df), function(x){ # Go through the rows of A SINGLE df
@@ -91,8 +101,11 @@ rna_23s <- function(org_id, samples.df){
   output_profile.df <- bind_rows(output_profile.df, values)
 
   writeLines("rRNA23S_pipeline() Completed...")
-
-  output_profile.df
+  write.csv(output_profile.df,
+            paste(out_location, paste(org_id, "rRNA23S", "WADE.csv", sep = "_"), sep = ""),
+            quote = FALSE,
+            row.names = FALSE)
+  print(output_profile.df)
 }
 
 # ------------------ get_allele_fraction() ------------------

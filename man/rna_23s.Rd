@@ -4,12 +4,12 @@
 \alias{rna_23s}
 \title{rRNA.R}
 \usage{
-rna_23s(org_id, samples.df)
+rna_23s(org_id, samples)
 }
 \arguments{
 \item{org_id}{Organism to query: GAS, PNEUMO or GONO}
 
-\item{samples.df}{Data frame of user selected samples and the sample paths}
+\item{samples}{Data frame of user selected samples and the sample paths}
 }
 \value{
 A data frame containing the results of the query

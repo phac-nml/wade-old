@@ -2,14 +2,14 @@
 % Please edit documentation in R/general_mlst.R
 \name{general_mlst_pipeline}
 \alias{general_mlst_pipeline}
-\title{general_mlst_pipeline}
+\title{Create a profile for MLST, NGMAST, or NGSTAR using blastn}
 \usage{
-general_mlst_pipeline(org_id, sample_num, locus, seq_type)
+general_mlst_pipeline(org_id, samples.df, locus, seq_type)
 }
 \arguments{
 \item{org_id}{Organism to query: GAS, PNEUMO or GONO}
 
-\item{sample_num}{Sample number associated with contig.fasta file}
+\item{samples.df}{Data frame of user selected samples and the sample paths}
 
 \item{locus}{The locus to query, or enter "list" to use a list of alleles}
 

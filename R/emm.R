@@ -1,20 +1,26 @@
 #' emm typing pipeline from WGS assemblies
 #'
 #' Takes Organism, Sample Number, Locus, and a Variable at queries a contig.fasta file
-#' @param Org_id Organism to query: GAS, PNEUMO or GONO
+#' @param org_id Organism to query: GAS
 #' @param samples.df Data frame of user selected samples and the sample paths
 #' @param locus Sample number associated with contig.fasta file
-
+#' @importFrom dplyr filter bind_rows
+#' @importFrom purrr is_empty map_df pmap
+#' @import here
+#' @import utils
+#' @import magrittr
 #' @return A table frame containing the results of the query
 #' @export
 
-emm <- function(org_id, samples.df, locus){
-  
+emm <- function(org_id, samples.df, locus, top=TRUE){
+  if (org_id %notin% c("GAS")) {
+    stop('EMM typing is only for Group A Strep (GAS)', call.=FALSE)
+  }
   # Directories ####
-  contigs_dir <- here("data", "databases", org_id, "assemblies")
-  lookup_dir <- here("data", "databases", org_id, "EMM", "allele_lkup_dna")
-  all_loci <- here("data", "databases", org_id, "EMM", "temp", "loci.csv") # Location of the loci
-  blast_out_file <- here("data", "output", "blastout.csv") # A temporary location to hold the blast output (Is deleted later)
+  
+  lookup_dir <- system.file(paste("extdata/databases", org_id, "EMM", "allele_lkup_dna", sep = "/"), package = "wade") # extdata/databases/curr_db/curr_db.fasta
+  all_loci <- system.file(paste("extdata/databases", org_id, "EMM", "temp", "loci.csv", sep = "/"), package = "wade") # Location of the loci
+  blast_out_file <- paste(out_location, "emm_blast_out.csv", sep = "") # A temporary location to hold the blast output (Is deleted later)
 
   # ---------------- Variables ----------------
   error <- "Sample_Err"
@@ -41,7 +47,7 @@ emm <- function(org_id, samples.df, locus){
   
   query_files <- file.path(samples.df[,"parent_dir"], samples.df[,"subdir_id"], samples.df[,"filename"])
   
-  progress_frac <- 1/(length(all_samples)*length(all_loci)) # Determine the incProgress increment amount
+  # progress_frac <- 1/(length(all_samples)*length(all_loci)) # Determine the incProgress increment amount #progressrelated
   
   loci_dna_lookup <- all_loci %>% pmap(~ paste(lookup_dir, "/", .x, ".fasta", sep = ""))
   
@@ -50,8 +56,8 @@ emm <- function(org_id, samples.df, locus){
     if(file.exists(x)){
       new_blast <- data.frame()
       # Need to check if the loci.fasta exists
-      incProgress(amount = progress_frac,
-                  message = paste("Executing emm blast on ", basename(x), sep=""))
+      # incProgress(amount = progress_frac,
+      #            message = paste("Executing emm blast on ", basename(x), sep="")) #progressrelated
       
       # Perform and Read blast
       
@@ -99,36 +105,40 @@ emm <- function(org_id, samples.df, locus){
   }
   
   # A row will have an error when there is a sample that does not exist
-  output.df <- filter(output.df, Type != error) # Filter out the rows that contain errors
-
-  if(num_samples == 1){
-    write_emm_output(write_blast = TRUE, blastout.df, output.df, org_id)
-    return(blastout.df)
-  } else {
-    write_emm_output(write_blast = FALSE, blastout.df, output.df, org_id)
-    return(output.df)
+  output.df <- output.df %>% 
+    filter(Type != error) %>%     # Filter out the rows that contain errors
+    mutate(Type = str_extract(Type, "[^.]+")) %>% # Get rid of subtyping from Type column
+    arrange(desc(bp_id))    #Order it
+  
+  if(top){
+    output.df <- filter(output.df, bp_id == max(bp_id)) # If getting top only, grab only those results with the top bp_id
   }
-} # end function call
+  
+  #output.df
+  write_emm_output(blastout.df, output.df, org_id)
+  
+} # end function call 
 
 # ------------------------------------
 # write_emm_output()
 #
 # create .csv's based on the given parameters
-write_emm_output <- function(write_blast, blast.df, sample.df, org_id){
-  datetime <- format(Sys.time(), "%Y-%m-%d")
+write_emm_output <- function(blast.df, sample.df, org_id, out=out_location){
   
-  # Multiple output locations
-  emm_blast_file <- here("data", "output", paste(datetime, "_emm_blast.csv", sep=""))
-  emm_file <- here("data", "output", paste(datetime, "_emm.csv", sep=""))
-  emm_labware_file <- here("data", "output", paste(datetime, "_LabWareUpload_GAS_emm.csv", sep=""))
+  # Multiple output files
+  writeLines(paste("Writing output to", out))
   
-  if(write_blast){ # We only write the blast when there is one file
-    write.csv(blast.df, emm_blast_file, row.names = FALSE)
-  } else { # Otherwise just write E V E R Y T H I N G
-    write.csv(sample.df, emm_file, row.names = FALSE)
-  }
+  emm_blast_file <- paste(out, paste(org_id, "emmBLAST", "WADE.csv", sep = "_"), sep = "")
+  emm_file <- paste(out, paste(org_id, "emm", "WADE.csv", sep = "_"), sep = "")
   
-  write.csv(sample.df, emm_labware_file, quote = FALSE, row.names = FALSE) # Always write a LabwareOutput
+  write.csv(blast.df, 
+            emm_blast_file, 
+            quote = FALSE, 
+            row.names = FALSE)
+  write.csv(sample.df, 
+            emm_file, 
+            quote = FALSE, 
+            row.names = FALSE)
   
   writeLines("DONE: EMM_pipeline()")
 }

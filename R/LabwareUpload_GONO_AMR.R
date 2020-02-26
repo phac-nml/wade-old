@@ -7,29 +7,71 @@
 #'
 #'
 
-labware_gono_amr <- function() {
+labware_gono_amr <- function(amrDF, ngstarDF, rnaDF) {
   # TODO ####
   # - Line 104, The comparator is NA, we should handle this case for everything
+  
+  AMR_Output.df <- amrDF
+  NGSTAR_Output.df <- ngstarDF
+  
+  # Testing
+  # NGSTAR_Output.df <- read.csv(here("output","output_profile_mut.csv"),
+  #                              header = TRUE,
+  #                              sep = ",",
+  #                              stringsAsFactors = FALSE)
 
+  
+  
+  rRNA23S_Output.df <- rnaDF
+  
+  
   # Initialize DF's ####
-  AMR_Output.df <- read.csv(here("data", "input", "labware", "output_profile_GONO_AMR.csv"),
-                            header = TRUE,
-                            sep = ",",
-                            stringsAsFactors = FALSE)
-  NGSTAR_Output.df <- read.csv(here("data", "output", "GONO", "output_profile_mut.csv"),
-                               header = TRUE,
-                               sep = ",",
-                               stringsAsFactors = FALSE)
-  rRNA23S_Output.df <- read.csv(here("data", "output", "output_profile_23S.csv"),
-                                header = TRUE,
-                                sep = ",",
-                                stringsAsFactors = FALSE)
+  # AMR_Output.df <- read.csv(here("data", "input", "labware", "output_profile_GONO_AMR.csv"),
+  #                           header = TRUE,
+  #                           sep = ",",
+  #                           stringsAsFactors = FALSE)
+  # NGSTAR_Output.df <- read.csv(here("data", "output", "GONO", "output_profile_mut.csv"),
+  #                              header = TRUE,
+  #                              sep = ",",
+  #                              stringsAsFactors = FALSE)
+  # rRNA23S_Output.df <- read.csv(here("data", "output", "output_profile_23S.csv"),
+  #                               header = TRUE,
+  #                               sep = ",",
+  #                               stringsAsFactors = FALSE)
+  
   rRNA23S_Output.df <- rRNA23S_Output.df %>% mutate(SampleNo = as.character(SampleNo)) # Convert the SampleNo in rRNA23S to a character
-
+  
   Combined_Output_first.df <- full_join(AMR_Output.df, NGSTAR_Output.df, by = "SampleNo")
   Combined_Output.df <- full_join(Combined_Output_first.df, rRNA23S_Output.df, by = "SampleNo")
-
+  
   NumSamples <- (dim(Combined_Output.df))[1]
+  
+  # Import MIC dfs ####
+  db_dir <- system.file("extdata/databases", package = "wade") # extdata/databases/ in the wade folder beneath system R library
+  azi_mic.df <- read.csv(paste(db_dir, "GONO", "NGSTAR", "temp", "inc_mic_azi.csv", sep = "/"), 
+                         header = TRUE,
+                         sep = ",",
+                         stringsAsFactors = FALSE)
+  
+  pen_mic.df <- read.csv(paste(db_dir, "GONO", "NGSTAR", "temp", "inc_mic_penicillin.csv", sep = "/"), 
+                         header = TRUE,
+                         sep = ",",
+                         stringsAsFactors = FALSE)
+
+  cfx_mic.df <- read.csv(paste(db_dir, "GONO", "NGSTAR", "temp", "inc_mic_ceftriaxone.csv", sep = "/"),
+                         header = TRUE,
+                         sep = ",",
+                         stringsAsFactors = FALSE)
+  
+  cfm_mic.df <- read.csv(paste(db_dir, "GONO", "NGSTAR", "temp", "inc_mic_cefixime.csv", sep = "/"),
+                         header = TRUE,
+                         sep = ",",
+                         stringsAsFactors = FALSE)
+  
+  cip_mic.df <- read.csv(paste(db_dir, "GONO", "NGSTAR", "temp", "inc_mic_ciprofloxacin.csv", sep = "/"),
+                         header = TRUE,
+                         sep = ",",
+                         stringsAsFactors = FALSE)
 
   # Variables ####
   delim_dash <- " - "
@@ -38,8 +80,8 @@ labware_gono_amr <- function() {
   ErrorFound <- FALSE
 
   # Iteration ####
-  for (m in 1L:NumSamples)  #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Build Molecular Profile
-  {
+  for (m in 1L:NumSamples){ #<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Build Molecular Profile
+  
     molec_profile <- NA
 
     lw_CurrSampleNo <- as.character(Combined_Output.df[m, "SampleNo"])
@@ -468,11 +510,9 @@ labware_gono_amr <- function() {
 
       if (azi_MIC_inc > 12) {azi_MIC_inc <- 12L}
 
-      # Hardcoded Dir ####
-      azi_mic.df <- read.csv(here("data", "databases", "NGSTAR", "temp", "inc_mic_azi.csv"),
-                             header = TRUE,
-                             sep = ",",
-                             stringsAsFactors = FALSE)
+      # AZI MIC Data import moved to beginning
+      
+      
       azi <- paste(azi_mic.df$MIC[azi_mic.df$Inc == azi_MIC_inc], " ug/ml", sep = "")
       azi_interp <- azi_mic.df$Interp[azi_mic.df$Inc == azi_MIC_inc]
 
@@ -494,11 +534,9 @@ labware_gono_amr <- function() {
                         )
     if (pen_MIC_inc > 16) {cfm_MIC_inc <- 16L}
 
-    # Hardcoded Dir ####
-    pen_mic.df <- read.csv(here("data", "databases", "NGSTAR", "temp", "inc_mic_penicillin.csv"),
-                           header = TRUE,
-                           sep = ",",
-                           stringsAsFactors = FALSE)
+    # PEN MIC Data import moved to beginning
+    
+    
     pen <- paste(pen_mic.df$MIC[pen_mic.df$Inc == pen_MIC_inc], " ug/ml", sep = "")
     pen_interp <- pen_mic.df$Interp[pen_mic.df$Inc == pen_MIC_inc]
 
@@ -532,11 +570,8 @@ labware_gono_amr <- function() {
 
     if (cfx_MIC_inc > 10) {cfm_MIC_inc <- 10L}
 
-    # Hardcoded Dir ####
-    cfx_mic.df <- read.csv(here("data", "databases", "NGSTAR", "temp", "inc_mic_ceftriaxone.csv"),
-                           header = TRUE,
-                           sep = ",",
-                           stringsAsFactors = FALSE)
+    # CFX MIC Data import moved to beginning
+    
     cfx <- paste(cfx_mic.df$MIC[cfx_mic.df$Inc == cfx_MIC_inc], " ug/ml", sep = "")
     cfx_interp <- cfx_mic.df$Interp[cfx_mic.df$Inc == cfx_MIC_inc]
 
@@ -555,11 +590,8 @@ labware_gono_amr <- function() {
                           )
     if (cfm_MIC_inc > 10) {cfm_MIC_inc <- 10L}
 
-    # Hardcoded Dir ####
-    cfm_mic.df <- read.csv(here("data", "databases", "NGSTAR", "temp", "inc_mic_cefixime.csv"),
-                           header = TRUE,
-                           sep = ",",
-                           stringsAsFactors = FALSE)
+    # CFM MIC Data import moved to beginning
+    
     cfm <- paste(cfm_mic.df$MIC[cfm_mic.df$Inc == cfm_MIC_inc], " ug/ml", sep = "")
     cfm_interp <- cfm_mic.df$Interp[cfm_mic.df$Inc == cfm_MIC_inc]
     }
@@ -588,11 +620,8 @@ labware_gono_amr <- function() {
                         )
     if (cip_MIC_inc > 13) {cfm_MIC_inc <- 13L}
 
-    # Hardcoded Dir ####
-    cip_mic.df <- read.csv(here("data", "databases", "NGSTAR", "temp", "inc_mic_ciprofloxacin.csv"),
-                           header = TRUE,
-                           sep = ",",
-                           stringsAsFactors = FALSE)
+    # CIP MIC Data import moved to beginning
+    
     cip <- paste(cip_mic.df$MIC[cip_mic.df$Inc == cip_MIC_inc], " ug/ml", sep = "")
     cip_interp <- cip_mic.df$Interp[cip_mic.df$Inc == cip_MIC_inc]
 
@@ -677,7 +706,8 @@ labware_gono_amr <- function() {
 
   # Output ####
   write.csv(x = lw_Output.df,
-            here("data", "input", "labware", "LabWareUpload_GONO_AMR.csv"),
+            #here("data", "input", "labware", "LabWareUpload_GONO_AMR.csv"),
+            paste(out_location, paste("LabwareGONOAMR", "WADE.csv", sep = "_"), sep = ""),
             quote = FALSE,
             row.names = FALSE)
 

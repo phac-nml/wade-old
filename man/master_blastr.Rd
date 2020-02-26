@@ -4,16 +4,16 @@
 \alias{master_blastr}
 \title{Molecular typing pipeline for WGS assemblies}
 \usage{
-master_blastr(org_id, test_id, sample_num, locus_id)
+master_blastr(org_id, test_id, samples, locus_id = "list", sens = "10e-50")
 }
 \arguments{
 \item{org_id}{Organism to query: GAS, PNEUMO or GONO}
 
 \item{test_id}{AMR, TOXINS, VIRULENCE, NGSTAR, use MASTER for 16S id}
 
-\item{sample_num}{Sample number associated with contig.fasta file}
-
 \item{locus_id}{The locus to query, or enter "list" to use a list of alleles}
+
+\item{sample_num}{Sample number associated with contig.fasta file}
 }
 \value{
 A table frame containing the results of the query

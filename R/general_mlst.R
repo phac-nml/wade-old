@@ -7,20 +7,29 @@
 #'
 #' @details
 #'
+#' @importFrom dplyr filter arrange bind_cols bind_rows select
+#' @import here
+#' @import utils
 #' @return A profile containing the sample number, and the loci tested on
 #' @export
 
 general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
+  if (seq_type %notin% c("MLST", "NGMAST", "NGSTAR")) {
+    stop('General MLST seq_type must be one of MLST, NGMAST, or NGSTAR', call.=FALSE)
+  }
 
+  if (seq_type %in% c("NGMAST", "NGSTAR") & org_id != "GONO") {
+    stop('NGMAST and NGSTAR are GONO only tests', call.=FALSE)
+  }
+  
   # ------------- Directories ----------------
-  db_dir <- paste("data/databases")
-
-  contigs_dir <- here("data", "databases", org_id, "assemblies") # Where are the assemblies
-  lookup_dir <- here(db_dir, org_id, seq_type, "allele_lkup_dna") # Lookups
-  temp_dir <- here(db_dir, org_id, seq_type, "temp") # Temporary
+  db_dir <- system.file("extdata/databases", package = "wade") # extdata/databases/curr_db/curr_db.fasta
+  lookup_dir <- paste(db_dir, org_id, seq_type, "allele_lkup_dna", sep = "/")  # Lookups
+  temp_dir <- paste(db_dir, org_id, seq_type, "temp", sep="/") # Temporary
   profiles_dir <- paste(temp_dir, "/", "profiles.csv", sep = "")
   loci.list <- paste(temp_dir, "/", "loci.csv", sep = "") # Loci list
-  blast_out_file <- here("data", "output", "blastout.txt")
+  blast_out_file <- paste(out_location, org_id, "_blast_out.tsv", sep = "")
+  
   
   if(!file.exists(blast_out_file)){
     file.create(blast_out_file) # If it doesn't exist yet just create it.
@@ -57,15 +66,16 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
     allele <- ""
     allele_num <- ""
     
+    # Cut off file extension in table
     curr_sample_num <- sub("([^.]+)\\.[[:alnum:]]+$", "\\1", samples.df[i, "filename"])
     curr_file <- file.path(samples.df[i, "parent_dir"], samples.df[i, "subdir_id"], samples.df[i, "filename"])
     
-    dest_file <- here("data", "queryfile.fasta") # Still need a finalized location
+    dest_file <- paste(out_location, "queryfile.fasta", sep = "") 
     if(!file.exists(dest_file)){
       file.create(dest_file) # If it doesn't exist yet just create it.
     }
     
-    if(!file.copy(curr_file, dest_file, overwrite = TRUE)){
+    if(!file.copy(curr_file, dest_file, overwrite = TRUE, copy.mode = FALSE)){
       allele <- "Sample Number Error" # Do we need this?
       allele_num <- "Sample_Err"
     }
@@ -81,8 +91,8 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
       
       if(allele_num != "Sample_Err"){ # This is redundant!! Put it before so nothing can execute!
         
-        incProgress(amount = 1/(num_samples*num_loci),
-                    message = paste(seq_type, " Pipeline: ", curr_sample_num, " blastn on ", curr_locus, sep = "")) # Progress ####
+        #incProgress(amount = 1/(num_samples*num_loci),
+        #            message = paste(seq_type, " Pipeline: ", curr_sample_num, " blastn on ", curr_locus, sep = "")) #progressrelated
         
         locus_dna_lookup <- paste(lookup_dir, "/", curr_locus, ".fasta", sep = "")
         
@@ -184,11 +194,6 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
       }
     } # End Locus Loop ####
     
-    #------ REMOVE FILES -------
-    # We remove these files after our looping
-    file.remove(blast_out_file) # Delete the blast file
-    file.remove(dest_file) # Delete the copied .fasta
-    
     if(locus == "list"){
       # ----------- lookup profiles
       profiles_copy.df <- data.frame(profiles.df)
@@ -238,60 +243,65 @@ general_mlst_pipeline <- function(org_id, samples.df, locus, seq_type){
     sample_out.df$ST <- paste("porB-", sample_out.df$porB, sep = "")
   }
   
-  if(num_loci == 1){ # If we only used one loci
-    out_file <- here("data", "output", org_id, paste(org_id, "_MLST_blast.csv", sep = ""))
+  #------ REMOVE FILES -------
+  # We remove these files after our looping
+  # writeLines(paste("Removing", blast_out_file))
+  # file.remove(blast_out_file) # Delete the blast file
+  # writeLines(paste("Removing", dest_file))
+  # file.remove(dest_file) # Delete the copied .fasta
+  writeLines(paste("Removing temporary blast files. ", list.files(out_location, "_blast_out.tsv$", full.names = F)))
+  file.remove(list.files(out_location, "_blast_out.tsv$", full.names = T))
+  file.remove(dest_file)
+  writeLines("DONE: general_mlst_pipeline()")
+  
+  if(num_loci == 1){ # If we only used one loci - Not in first Galaxy iteration
+    out_file <- paste(out_location, paste(org_id, "MLST-blast", "WADE.csv", sep = "_"), sep = "")
     write.csv(blast_out.df, out_file, row.names = FALSE)
-    
     writeLines("DONE: general_mlst_pipeline()")
+    
     return(blast_out.df)
+    
   } else {
     
+    
     # ---------------- File Output ----------------
-    
-    out_location <- here("data", "output", org_id)
-    
+    print(sample_out.df)
     if(seq_type == "MLST"){
       # --- MLST out
       write.csv(sample_out.df,
-                paste(out_location, "/", org_id, "_MLST.csv", sep = ""),
-                quote = FALSE,  row.names = FALSE)
-      
-      write.csv(sample_out.df,
-                paste(out_location, "/output_profile_MLST.csv", sep = ""),
+                paste(out_location, paste(org_id, "MLST-profile", "WADE.csv", sep = "_"), sep = ""),
                 quote = FALSE,
                 row.names = FALSE)
       writeLines("--- profile_mlst.csv ---")
-    } else {
-      lw_out <- paste("LabWareUpload_GONO_", seq_type, ".csv", sep = "")
-      writeLines(paste("Writing out: ", lw_out, sep = ""))
-      write.csv(sample_out.df,
-                paste(out_location, "/", lw_out, sep = ""),
-                quote = FALSE,
-                row.names = FALSE)
+      return(sample_out.df) 
       
-      profile_out <- paste("output_profile_GONO_", seq_type, ".csv", sep = "")
-      writeLines(paste("Writing out: ", profile_out, sep = ""))
+    } else {
+      
       write.csv(sample_out.df,
-                paste(out_location, "/", profile_out, sep = ""),
+                paste(out_location, paste(org_id, "MLST-profile", "WADE.csv", sep = "_"), sep = ""),
                 quote = FALSE,
                 row.names = FALSE)
     }
 
     if(seq_type == "NGSTAR"){
-      writeLines(paste("Writing out: output_profile_mut.csv"))
+      
       write.csv(sample_mut_out.df,
-                paste(out_location, "/output_profile_mut.csv", sep = ""),
+                paste(out_location, paste(org_id, "NGSTAR-mut", "WADE.csv", sep = "_"), sep = ""),
                 quote = FALSE,
                 row.names = FALSE)
+      #return(sample_mut_out.df) # Files saved, why print?
+      
     } else if(seq_type == "NGMAST"){
       # --- NGMAST out
       write.csv(sample_out.df,
-                paste(out_location, "/output_profile.csv", sep = ""),
+                paste(out_location, paste(org_id, "NGMAST-profile", "WADE.csv", sep = "_"), sep = ""),
+                quote = FALSE,
                 row.names = FALSE)
+      #return(sample_out.df) # Files saved, why print?
     }
 
-    writeLines("DONE: general_mlst_pipeline()")
-    return(sample_out.df)
+    
+    
   }
 
 } # general_mlst_pipeline()

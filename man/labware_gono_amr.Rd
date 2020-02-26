@@ -6,7 +6,7 @@
 Then run this analysis to combine data from AMR, 23S rRNA and NG-STAR
 to prepare full amr profile to upload to LabWare.}
 \usage{
-labware_gono_amr()
+labware_gono_amr(amrDF, ngstarDF, rnaDF)
 }
 \value{
 A table frame containing the results of the query
