@@ -114,8 +114,8 @@ emm <- function(org_id, samples.df, locus, top=TRUE){
     output.df <- filter(output.df, bp_id == max(bp_id)) # If getting top only, grab only those results with the top bp_id
   }
   
-  output.df
-  #write_emm_output(blastout.df, output.df, org_id)
+  #output.df
+  write_emm_output(blastout.df, output.df, org_id)
   
 } # end function call 
 
