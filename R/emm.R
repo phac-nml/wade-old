@@ -12,7 +12,7 @@
 #' @return A table frame containing the results of the query
 #' @export
 
-emm <- function(org_id, samples.df, locus){
+emm <- function(org_id, samples.df, locus, top=TRUE){
   if (org_id %notin% c("GAS")) {
     stop('EMM typing is only for Group A Strep (GAS)', call.=FALSE)
   }
@@ -105,11 +105,19 @@ emm <- function(org_id, samples.df, locus){
   }
   
   # A row will have an error when there is a sample that does not exist
-  output.df <- filter(output.df, Type != error) # Filter out the rows that contain errors
-
+  output.df <- output.df %>% 
+    filter(Type != error) %>%     # Filter out the rows that contain errors
+    mutate(Type = str_extract(Type, "[^.]+")) %>% # Get rid of subtyping from Type column
+    arrange(desc(bp_id))    #Order it
+  
+  if(top){
+    output.df <- filter(output.df, bp_id == max(bp_id)) # If getting top only, grab only those results with the top bp_id
+  }
+  
+  #output.df
   write_emm_output(blastout.df, output.df, org_id)
   
-} # end function call
+} # end function call 
 
 # ------------------------------------
 # write_emm_output()

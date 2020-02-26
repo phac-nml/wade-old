@@ -225,13 +225,13 @@ master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e
             if (TimesThrough == 1) {
               if (str_detect(linn[i], "Identities")) {
                 IdLine <-  unlist(linn[i])
-                #IdLine <- " Identities = 2431/2460 (99%), Gaps = 0/2460 (0%)"
                 IdLine <- substr(IdLine, 15, 50)
                 IdLineParts <- strsplit(IdLine, "/")
                 IDLineParts2 <- unlist(IdLineParts)
                 IDlength <- as.numeric(IDLineParts2[1])
                 IDcoverage <- ((IDlength / WTlength) * 100)
                 IDpercent <- sprintf("%3.1f%%", IDcoverage)
+                IdLine <- str_split(IdLine, ",", simplify = T)[1]
               }
 
               if (str_detect(linn[i], "Query ")) {
@@ -536,7 +536,7 @@ master_blastr <- function(org_id, test_id, samples, locus_id = "list", sens="10e
           sample_profile <- paste(sample_profile, ProfileEntry, sep = "")
         }
       }
-
+# HERE
       cat(curr_sample_num, locus, AlleleInfo[1], AlleleInfo[2], AlleleInfo[3], AlleleInfo[4], IdLine, IDpercent2, "\n", sep = "\t")
       # incProgress(amount = 1/progress_ratio,
       #           message = paste(curr_sample_num, "on", locus)) # Progress ####
