@@ -1,8 +1,3 @@
----
-title: "MasterBlastR"
-output: html_document
----
-
 ## What is MasterBlastR?
 
 MasterBlastR provides a flexible and customizable method to extract specific genes from assembled contigs.
