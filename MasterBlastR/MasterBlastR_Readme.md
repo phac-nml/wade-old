@@ -47,28 +47,35 @@ and the use of the BLAST+ executable from NCBI: https://blast.ncbi.nlm.nih.gov/B
 
 1. Ensure MasterBlastR is located in a folder with subfolders "output", "temp", "wildgenes" and "allele_lkup_dna".
 
-2. Set the working directory where MasterBlastR is located.
+2. Ensure blast_evalues.csv is located in the same folder as MasterBlastR  
+   blast_evalues.csv must have the following structure:  
+   ```sh
+   contig     allele      wt_id 
+   1.00E-50   1.00E-98    10
+   ```
+
+3. Set the working directory where MasterBlastR is located.
    ```sh
    line 20: curr_work_dir <- "C:\\MasterBlastR\\"
    ```
 
-3. This molecular analysis tool queries pre-assembled fasta files. The location of the contig files needs to be assigned to ContigsDir with the file extension ".fasta" (eg. MySampleNo_contig.fasta).
+4. This molecular analysis tool queries pre-assembled fasta files. The location of the contig files needs to be assigned to ContigsDir with the file extension ".fasta" (eg. MySampleNo_contig.fasta).
    ```sh
    line 21: ContigsDir <- "C:\\MasterBlastR\\contigs\\"
    ```
 
-4. Put reference gene sequences into subfolders. File names need to be the same for both files (i.e. parC.fasta):
+5. Put reference gene sequences into subfolders. File names need to be the same for both files (i.e. parC.fasta):
    a. wild-type into "wildgenes"  
    b. allele lookup multi-fasta files into "allele_lkup_dna" (optional)    
    
 
-5. fasta headers for reference gene sequences should be in the following format:
+6. fasta headers for reference gene sequences should be in the following format:
    ```sh
    >Locusname_AlleleNum_Mutation_Comment_Variable
    ex. >folA_28_I100L_Sample5_NA
    ```
 
-6. To query genes for which an allele lookup multi-fasta file is unavailable, ensure the "wildgenes" folder contains a .fasta of the wild-type gene and create a loci mutations list in the directory. (eg. C:/MasterBlastR/loci_mutations.csv).  
+7. To query genes for which an allele lookup multi-fasta file is unavailable, ensure the "wildgenes" folder contains a .fasta of the wild-type gene and create a loci mutations list in the directory. (eg. C:/MasterBlastR/loci_mutations.csv).  
    loci_mutations.csv must have the following structure:
    ```sh
    Locus_id   Name      Posn_1    Posn_2    WildType  
@@ -76,9 +83,9 @@ and the use of the BLAST+ executable from NCBI: https://blast.ncbi.nlm.nih.gov/B
    gene2      ARA100    100       102       ARA
    ```
 
-7. Gene names must be consistent between wildgenes file name, lookup table file name, Locus_id in loci_mutations.csv, and query.
+8. Gene names must be consistent between wildgenes file name, lookup table file name, Locus_id in loci_mutations.csv, and query.
 
-7. To use the multiple sample list option, a multiple sample list file must be located in the directory. (eg. C:/MasterBlastR/list.csv)  
+9. To use the multiple sample list option, a multiple sample list file must be located in the directory. (eg. C:/MasterBlastR/list.csv)  
    list.csv must have the following structure:
    ```sh
    SampleNo	    Variable   
@@ -86,7 +93,7 @@ and the use of the BLAST+ executable from NCBI: https://blast.ncbi.nlm.nih.gov/B
    12346	      8 ug/ml   
    ```
 
-8. To use the multiple locus list option, a multiple locus list file must be located in the directory. (eg. C:/MasterBlastR/loci.csv).
+10. To use the multiple locus list option, a multiple locus list file must be located in the directory. (eg. C:/MasterBlastR/loci.csv).
    loci.csv must have the following structure:
    ```sh
    Locus_id
